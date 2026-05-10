@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nyaya-shared"
+version = "0.1.0"
+description = "Shared Pydantic models, taxonomy, Kafka schemas, and privacy utilities for the Nyaya platform"
+requires-python = ">=3.11"
+license = { text = "AGPL-3.0-or-later" }
+dependencies = [
+  "pydantic>=2.7.0",
+  "python-dateutil>=2.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-asyncio>=0.23.0",
+  "ruff>=0.4.0",
+  "mypy>=1.10.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["nyaya_shared"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "S", "ANN"]
+ignore = [
+  "ANN101",  # Missing type annotation for `self`
+  "ANN102",  # Missing type annotation for `cls`
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+no_implicit_reexport = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

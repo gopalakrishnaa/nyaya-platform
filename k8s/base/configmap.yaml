@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nyaya-config
+  namespace: nyaya
+data:
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  OPENSEARCH_HOST: "opensearch"
+  OPENSEARCH_PORT: "9200"
+  REDIS_URL: "redis://redis:6379/0"
+  LOG_LEVEL: "INFO"
+  PYTHONUNBUFFERED: "1"

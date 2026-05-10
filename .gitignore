@@ -1,0 +1,144 @@
+# =============================================================================
+# NYAYA PLATFORM — .gitignore
+# =============================================================================
+
+# --- Secrets & Environment (NEVER commit) ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*_rsa
+*_rsa.pub
+*_ed25519
+*_ed25519.pub
+secrets/
+.secrets/
+
+# NOTE: .env.example IS committed intentionally — do NOT add it here
+
+# --- Node / JavaScript / TypeScript ---
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+# Turborepo
+.turbo/
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Python ---
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+.eggs/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Linting
+.ruff_cache/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Jupyter
+.ipynb_checkpoints/
+
+# --- Docker ---
+.docker/
+docker-compose.override.yml
+
+# --- Databases / local data ---
+*.sqlite
+*.sqlite3
+*.db
+postgres-data/
+redis-data/
+kafka-data/
+minio-data/
+opensearch-data/
+
+# --- IDE & Editor ---
+.idea/
+*.iml
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V10
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# --- Monitoring / Telemetry ---
+.clinic/
+
+# --- Misc ---
+*.log
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/

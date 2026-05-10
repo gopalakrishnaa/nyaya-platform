@@ -1,0 +1,247 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nyaya-postgres
+    environment:
+      POSTGRES_DB: nyaya
+      POSTGRES_USER: nyaya
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nyaya_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../schema/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../schema/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nyaya"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: nyaya-redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: nyaya-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: nyaya-kafka
+    depends_on: [zookeeper]
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: nyaya-kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: nyaya-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on: [kafka]
+
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: nyaya-opensearch
+    environment:
+      discovery.type: single-node
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_PASSWORD:-Nyaya@Dev1234}
+      plugins.security.disabled: "true"
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -q '\"status\":\"\\(green\\|yellow\\)\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: nyaya-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: nyaya-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-remote-write-receiver'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: nyaya-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    ports:
+      - "3030:3000"
+    volumes:
+      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    container_name: nyaya-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://nyaya:${POSTGRES_PASSWORD:-nyaya_dev}@postgres:5432/nyaya
+      REDIS_URL: redis://redis:6379
+      KAFKA_BROKERS: kafka:29092
+      OPENSEARCH_URL: http://opensearch:9200
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      PRIVACY_SALT: ${PRIVACY_SALT:-dev_salt_change_in_production_immediately}
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  privacy-engine:
+    build:
+      context: ../services/privacy-engine
+      dockerfile: Dockerfile
+    container_name: nyaya-privacy-engine
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      PRIVACY_SALT: ${PRIVACY_SALT:-dev_salt_change_in_production_immediately}
+    depends_on:
+      kafka: {condition: service_healthy}
+
+  ai-extractor:
+    build:
+      context: ../services/ai-extractor
+      dockerfile: Dockerfile
+    container_name: nyaya-ai-extractor
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    depends_on:
+      kafka: {condition: service_healthy}
+
+  entity-resolver:
+    build:
+      context: ../services/entity-resolver
+      dockerfile: Dockerfile
+    container_name: nyaya-entity-resolver
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      DATABASE_URL: postgresql+asyncpg://nyaya:${POSTGRES_PASSWORD:-nyaya_dev}@postgres:5432/nyaya
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      PRIVACY_SALT: ${PRIVACY_SALT:-dev_salt_change_in_production_immediately}
+    depends_on:
+      postgres: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+
+  timeline-engine:
+    build:
+      context: ../services/timeline-engine
+      dockerfile: Dockerfile
+    container_name: nyaya-timeline-engine
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      DATABASE_URL: postgresql+asyncpg://nyaya:${POSTGRES_PASSWORD:-nyaya_dev}@postgres:5432/nyaya
+    depends_on:
+      postgres: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+
+  persistence-worker:
+    build:
+      context: ../services/persistence-worker
+      dockerfile: Dockerfile
+    container_name: nyaya-persistence-worker
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      DATABASE_URL: postgresql+asyncpg://nyaya:${POSTGRES_PASSWORD:-nyaya_dev}@postgres:5432/nyaya
+      OPENSEARCH_URL: http://opensearch:9200
+    depends_on:
+      postgres: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+      opensearch: {condition: service_healthy}
+
+  ingestion:
+    build:
+      context: ../services/ingestion
+      dockerfile: Dockerfile
+    container_name: nyaya-ingestion
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET_RAW: nyaya-raw
+    depends_on:
+      kafka: {condition: service_healthy}
+
+volumes:
+  postgres_data:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka_data:
+  opensearch_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:

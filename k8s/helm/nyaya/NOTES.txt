@@ -1,0 +1,20 @@
+Nyaya न्याय has been deployed!
+
+Public frontend:  https://{{ .Values.ingress.hosts.frontend }}
+API:              https://{{ .Values.ingress.hosts.api }}
+Admin UI:         https://admin.{{ .Values.ingress.hosts.frontend }}
+
+Next steps:
+  1. Apply database schema:
+     kubectl exec -n nyaya deploy/api -- alembic upgrade head
+
+  2. Seed initial sources:
+     kubectl exec -n nyaya deploy/api -- python -m api.seeds.sources
+
+  3. Check pipeline health:
+     kubectl get pods -n nyaya -l tier=pipeline
+
+  4. Access Grafana dashboards:
+     kubectl port-forward -n nyaya svc/grafana 3000:3000
+
+Documentation: https://github.com/nyaya-platform/nyaya-platform/tree/main/docs

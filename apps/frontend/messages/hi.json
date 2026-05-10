@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "cases": "मामले",
+    "map": "नक्शा",
+    "about": "जानकारी"
+  },
+  "home": {
+    "title": "न्याय पारदर्शिता",
+    "subtitle": "FIR से सजा तक — भारत की न्याय प्रणाली में महिलाओं के विरुद्ध अपराधों की निगरानी।",
+    "search_placeholder": "राज्य, अपराध प्रकार, अदालत से खोजें…",
+    "search_button": "खोजें",
+    "recent_title": "हालिया मामले",
+    "view_all": "सभी मामले देखें →",
+    "no_cases": "अभी तक कोई मामला नहीं।"
+  },
+  "stats": {
+    "total_cases": "कुल मामले",
+    "convictions": "सजाएँ",
+    "states": "राज्य",
+    "pocso": "POCSO मामले",
+    "fast_track": "फ़ास्ट-ट्रैक मामले",
+    "conviction_rate": "सजा दर"
+  },
+  "cases": {
+    "filter_title": "मामले फ़िल्टर करें",
+    "crime_type": "अपराध प्रकार",
+    "all_types": "सभी प्रकार",
+    "status": "स्थिति",
+    "all_statuses": "सभी स्थितियाँ",
+    "year": "वर्ष",
+    "all_years": "सभी वर्ष",
+    "special": "विशेष फ़िल्टर",
+    "pocso_cases": "POCSO मामले",
+    "fast_track_court": "फ़ास्ट-ट्रैक अदालत",
+    "conviction_achieved": "सजा प्राप्त",
+    "apply": "फ़िल्टर लागू करें",
+    "clear": "फ़िल्टर हटाएँ",
+    "found": "{count} मामले मिले",
+    "none_found": "कोई मामला नहीं मिला।",
+    "prev": "← पिछला",
+    "next": "अगला →",
+    "page_of": "पृष्ठ {page} / {total}",
+    "under_review": "⚠ समीक्षा में",
+    "events_count": "{count} घटनाएँ",
+    "updated": "अपडेट {date}"
+  },
+  "case_detail": {
+    "progress": "प्रगति",
+    "deadline_analysis": "समयसीमा विश्लेषण",
+    "timeline": "टाइमलाइन",
+    "milestones": "प्रमुख मील-पत्थर",
+    "confidence": "डेटा विश्वसनीयता",
+    "under_review": "⚠ समीक्षा में",
+    "no_events": "अभी कोई घटना दर्ज नहीं।",
+    "location": "स्थान",
+    "incident": "घटना",
+    "ipc_sections": "IPC धाराएँ",
+    "victims": "पीड़ित",
+    "approx": "(अनुमानित)",
+    "privacy_notice": "पीड़ितों की पहचान क्रिप्टोग्राफ़िक छद्म नाम से सुरक्षित है। सभी डेटा सार्वजनिक स्रोतों से।",
+    "milestone_label": "मील-पत्थर",
+    "date_unknown": "तिथि अज्ञात",
+    "court": "अदालत"
+  },
+  "badges": {
+    "pocso": "POCSO",
+    "fast_track": "फ़ास्ट-ट्रैक",
+    "convicted": "✓ सजा",
+    "severely_delayed": "गंभीर विलंब",
+    "delayed": "विलंब",
+    "within_limit": "समय पर"
+  }
+}

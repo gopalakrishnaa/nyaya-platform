@@ -1,0 +1,37 @@
+# =============================================================================
+# NYAYA PLATFORM — CODEOWNERS
+#
+# Each line is a file pattern followed by one or more owners.
+# The last matching pattern takes precedence.
+# Order matters: more specific patterns must come AFTER less specific ones.
+# =============================================================================
+
+# --- Catch-all: maintainers review everything ---
+* @nyaya-platform/maintainers
+
+# --- Backend API ---
+apps/api/ @nyaya-platform/backend-team
+
+# --- Services (all backend microservices) ---
+services/ @nyaya-platform/backend-team
+
+# --- Frontend applications ---
+apps/frontend/ @nyaya-platform/frontend-team
+apps/admin-ui/ @nyaya-platform/frontend-team
+
+# --- Infrastructure ---
+k8s/ @nyaya-platform/infra-team
+docker/ @nyaya-platform/infra-team
+monitoring/ @nyaya-platform/infra-team
+ci/ @nyaya-platform/infra-team
+.github/workflows/ @nyaya-platform/infra-team
+
+# --- Privacy Engine (REQUIRED reviewer — privacy team must approve ALL changes) ---
+services/privacy-engine/ @nyaya-platform/privacy-team @nyaya-platform/backend-team
+
+# --- Schema (data model changes need both backend and privacy sign-off) ---
+schema/ @nyaya-platform/backend-team @nyaya-platform/privacy-team
+
+# --- Shared packages ---
+packages/shared-python/ @nyaya-platform/backend-team
+packages/shared-types/ @nyaya-platform/frontend-team @nyaya-platform/backend-team

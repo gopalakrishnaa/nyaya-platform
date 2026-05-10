@@ -1,0 +1,60 @@
+{
+  "title": "Nyaya — Ingestion Pipeline",
+  "uid": "nyaya-ingestion",
+  "tags": ["nyaya", "ingestion"],
+  "timezone": "Asia/Kolkata",
+  "refresh": "1m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Articles Ingested (24h)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "increase(nyaya_articles_ingested_total[24h])",
+        "legendFormat": "Articles"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Articles by Adapter",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [{
+        "expr": "rate(nyaya_articles_ingested_total[5m])",
+        "legendFormat": "{{adapter}}"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Crime-Relevant Article Rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [{
+        "expr": "rate(nyaya_articles_crime_relevant_total[5m])",
+        "legendFormat": "{{adapter}}"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Kafka Consumer Lag",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 12},
+      "targets": [{
+        "expr": "kafka_consumer_group_lag{namespace='nyaya'}",
+        "legendFormat": "{{topic}} / {{consumergroup}}"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Adapter Last Fetch (minutes ago)",
+      "type": "table",
+      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 20},
+      "targets": [{
+        "expr": "(time() - nyaya_adapter_last_fetch_timestamp) / 60",
+        "legendFormat": "{{adapter}}"
+      }]
+    }
+  ],
+  "schemaVersion": 38
+}

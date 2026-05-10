@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: nyaya-staging
+
+images:
+  - name: ghcr.io/nyaya-platform/nyaya-api
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-frontend
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-privacy-engine
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-ai-extractor
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-entity-resolver
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-timeline-engine
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-persistence-worker
+    newTag: staging
+  - name: ghcr.io/nyaya-platform/nyaya-ingestion
+    newTag: staging

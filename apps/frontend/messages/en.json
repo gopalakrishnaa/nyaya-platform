@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "cases": "Cases",
+    "map": "Map",
+    "about": "About"
+  },
+  "home": {
+    "title": "Justice Transparency",
+    "subtitle": "Tracking crimes against women through India's legal system — from FIR to conviction.",
+    "search_placeholder": "Search cases by state, crime type, court…",
+    "search_button": "Search",
+    "recent_title": "Recent Case Updates",
+    "view_all": "View all cases →",
+    "no_cases": "No cases loaded yet."
+  },
+  "stats": {
+    "total_cases": "Total Cases",
+    "convictions": "Convictions",
+    "states": "States Covered",
+    "pocso": "POCSO Cases",
+    "fast_track": "Fast-Track Cases",
+    "conviction_rate": "Conviction Rate"
+  },
+  "cases": {
+    "filter_title": "Filter Cases",
+    "crime_type": "Crime Type",
+    "all_types": "All types",
+    "status": "Status",
+    "all_statuses": "All statuses",
+    "year": "Year",
+    "all_years": "All years",
+    "special": "Special Filters",
+    "pocso_cases": "POCSO cases",
+    "fast_track_court": "Fast-track court",
+    "conviction_achieved": "Conviction achieved",
+    "apply": "Apply Filters",
+    "clear": "Clear filters",
+    "found": "{count} cases found",
+    "none_found": "No cases found matching your filters.",
+    "prev": "← Prev",
+    "next": "Next →",
+    "page_of": "Page {page} of {total}",
+    "under_review": "⚠ Under review",
+    "events_count": "{count} events",
+    "updated": "Updated {date}"
+  },
+  "case_detail": {
+    "progress": "Progress",
+    "deadline_analysis": "Deadline Analysis",
+    "timeline": "Timeline",
+    "milestones": "Key Milestones",
+    "confidence": "Data confidence",
+    "under_review": "⚠ Under review",
+    "no_events": "No events recorded yet.",
+    "location": "Location",
+    "incident": "Incident",
+    "ipc_sections": "IPC Sections",
+    "victims": "Victims",
+    "approx": "(approx.)",
+    "privacy_notice": "Victim identities are protected via cryptographic pseudonymisation. All data sourced from public records.",
+    "milestone_label": "Milestone",
+    "date_unknown": "Date unknown",
+    "court": "Court"
+  },
+  "badges": {
+    "pocso": "POCSO",
+    "fast_track": "Fast-Track Court",
+    "convicted": "✓ Conviction",
+    "severely_delayed": "Severely Delayed",
+    "delayed": "Delayed",
+    "within_limit": "Within Limit"
+  }
+}

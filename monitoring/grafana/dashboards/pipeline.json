@@ -1,0 +1,80 @@
+{
+  "title": "Nyaya — AI Pipeline",
+  "uid": "nyaya-pipeline",
+  "tags": ["nyaya", "pipeline", "ai"],
+  "timezone": "Asia/Kolkata",
+  "refresh": "1m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Privacy Redactions (rate)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "rate(nyaya_privacy_redactions_total[5m])",
+        "legendFormat": "{{redaction_type}}"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Minor Detections (rate)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{
+        "expr": "rate(nyaya_minor_detections_total[5m])",
+        "legendFormat": "Minor Detections/s"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Extraction Confidence Distribution",
+      "type": "histogram",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{
+        "expr": "nyaya_extraction_confidence_bucket",
+        "legendFormat": "{{le}}"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Extraction Errors (rate)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{
+        "expr": "rate(nyaya_extraction_errors_total[5m])",
+        "legendFormat": "{{error_type}}"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Entity Resolution Outcomes",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+      "targets": [{
+        "expr": "nyaya_entity_resolution_outcome_total",
+        "legendFormat": "{{outcome}}"
+      }]
+    },
+    {
+      "id": 6,
+      "title": "Avg Confidence by Route",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+      "targets": [{
+        "expr": "nyaya_extraction_confidence_sum / nyaya_extraction_confidence_count",
+        "legendFormat": "Mean Confidence"
+      }]
+    },
+    {
+      "id": 7,
+      "title": "LLM API Latency (p95)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(nyaya_llm_request_duration_seconds_bucket[5m]))",
+        "legendFormat": "p95 latency"
+      }]
+    }
+  ],
+  "schemaVersion": 38
+}

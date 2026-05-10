@@ -1,0 +1,293 @@
+
+# Privacy Engine
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: privacy-engine
+  namespace: nyaya
+  labels:
+    app: privacy-engine
+    tier: pipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: privacy-engine
+  template:
+    metadata:
+      labels:
+        app: privacy-engine
+        tier: pipeline
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: privacy-engine
+          image: ghcr.io/nyaya-platform/nyaya-privacy-engine:latest
+          ports:
+            - containerPort: 8001
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: nyaya-config
+            - secretRef:
+                name: nyaya-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 3Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: model-cache
+              mountPath: /root/.cache
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: model-cache
+          emptyDir:
+            sizeLimit: 2Gi
+---
+# AI Extractor
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-extractor
+  namespace: nyaya
+  labels:
+    app: ai-extractor
+    tier: pipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-extractor
+  template:
+    metadata:
+      labels:
+        app: ai-extractor
+        tier: pipeline
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8002"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ai-extractor
+          image: ghcr.io/nyaya-platform/nyaya-ai-extractor:latest
+          ports:
+            - containerPort: 8002
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: nyaya-config
+            - secretRef:
+                name: nyaya-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Entity Resolver
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: entity-resolver
+  namespace: nyaya
+  labels:
+    app: entity-resolver
+    tier: pipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: entity-resolver
+  template:
+    metadata:
+      labels:
+        app: entity-resolver
+        tier: pipeline
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8003"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: entity-resolver
+          image: ghcr.io/nyaya-platform/nyaya-entity-resolver:latest
+          ports:
+            - containerPort: 8003
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: nyaya-config
+            - secretRef:
+                name: nyaya-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: model-cache
+              mountPath: /root/.cache
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: model-cache
+          emptyDir:
+            sizeLimit: 3Gi
+---
+# Timeline Engine
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timeline-engine
+  namespace: nyaya
+  labels:
+    app: timeline-engine
+    tier: pipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: timeline-engine
+  template:
+    metadata:
+      labels:
+        app: timeline-engine
+        tier: pipeline
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: timeline-engine
+          image: ghcr.io/nyaya-platform/nyaya-timeline-engine:latest
+          envFrom:
+            - configMapRef:
+                name: nyaya-config
+            - secretRef:
+                name: nyaya-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Persistence Worker
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persistence-worker
+  namespace: nyaya
+  labels:
+    app: persistence-worker
+    tier: pipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: persistence-worker
+  template:
+    metadata:
+      labels:
+        app: persistence-worker
+        tier: pipeline
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: persistence-worker
+          image: ghcr.io/nyaya-platform/nyaya-persistence-worker:latest
+          envFrom:
+            - configMapRef:
+                name: nyaya-config
+            - secretRef:
+                name: nyaya-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

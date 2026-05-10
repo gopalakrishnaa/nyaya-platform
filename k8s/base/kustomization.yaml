@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nyaya
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - pvc.yaml
+  - api-deployment.yaml
+  - frontend-deployment.yaml
+  - pipeline-deployments.yaml
+  - cronjobs.yaml

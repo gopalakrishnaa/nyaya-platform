@@ -1,0 +1,162 @@
+groups:
+  - name: nyaya_critical
+    rules:
+      - alert: PrivacyEngineDown
+        expr: up{job="nyaya-privacy-engine"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: privacy
+        annotations:
+          summary: "Privacy engine DOWN — articles may publish without redaction"
+          description: "CRITICAL: Stop publication pipeline. Privacy engine has been down for {{ $value }}s."
+
+      - alert: OpenSearchClusterRed
+        expr: opensearch_cluster_status{color="red"} == 1
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "OpenSearch cluster RED — search degraded"
+
+      - alert: UnredactedArticleInPublicAPI
+        expr: nyaya_unredacted_articles_public_total > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: privacy
+        annotations:
+          summary: "CRITICAL: Unredacted article in public API"
+          description: "{{ $value }} unredacted articles may be exposed. Immediate action required."
+
+      - alert: APIDown
+        expr: up{job="nyaya-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nyaya API is DOWN"
+
+  - name: nyaya_warning
+    rules:
+      - alert: KafkaConsumerLagHigh
+        expr: kafka_consumer_group_lag > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Kafka consumer lag > 1000 for {{ $labels.group }}"
+          description: "Consumer group {{ $labels.group }} has lag {{ $value }} messages."
+
+      - alert: ExtractionErrorRateHigh
+        expr: |
+          rate(nyaya_extraction_errors_total[5m])
+          /
+          rate(nyaya_extraction_attempts_total[5m]) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI extraction error rate > 10%"
+
+      - alert: APILatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket{job="nyaya-api"}[5m])
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API P95 latency > 2s"
+
+      - alert: APIErrorRateHigh
+        expr: |
+          rate(http_requests_total{job="nyaya-api",status=~"5.."}[5m])
+          /
+          rate(http_requests_total{job="nyaya-api"}[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API error rate > 5%"
+
+      - alert: PostgresConnectionsHigh
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL connections > 80%"
+
+      - alert: PostgresReplicationLag
+        expr: pg_replication_lag > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL replication lag > 30s"
+
+      - alert: ModerationQueueDeep
+        expr: nyaya_moderation_queue_depth > 500
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Moderation queue > 500 items — reviewers needed"
+
+      - alert: LowExtractionConfidence
+        expr: avg(nyaya_extraction_confidence) < 0.65
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Average extraction confidence < 0.65"
+
+      - alert: SourceAdapterStale
+        expr: time() - nyaya_source_last_scraped_timestamp > 3600
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Source {{ $labels.source_code }} not scraped in >1 hour"
+
+      - alert: NoCasesIngested
+        expr: increase(nyaya_cases_created_total[6h]) == 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No new cases ingested in 6 hours — check ingestion service"
+
+      - alert: PrivacyEngineRedactionStopped
+        expr: rate(nyaya_redactions_total[1h]) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Privacy engine not performing redactions for 30+ minutes"
+
+      - alert: MinioStorageHigh
+        expr: minio_bucket_usage_total_bytes / minio_bucket_quota_total_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MinIO storage usage > 85%"
+
+      - alert: EntityResolverDown
+        expr: up{job="nyaya-entity-resolver"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Entity resolver DOWN — new cases not being created"
+
+      - alert: PersistenceWorkerDown
+        expr: up{job="nyaya-persistence-worker"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Persistence worker DOWN — cases not being indexed"

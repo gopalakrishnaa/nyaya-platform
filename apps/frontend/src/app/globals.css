@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-crimson: #B91C1C;
+  --color-saffron: #F59E0B;
+  --color-green: #059669;
+  --color-navy: #1E3A5F;
+}

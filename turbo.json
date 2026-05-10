@@ -1,0 +1,63 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "DATABASE_URL",
+    "REDIS_URL",
+    "KAFKA_BROKERS",
+    "OPENSEARCH_URL",
+    "OPENSEARCH_USERNAME",
+    "OPENSEARCH_PASSWORD",
+    "MINIO_ENDPOINT",
+    "MINIO_ACCESS_KEY",
+    "MINIO_SECRET_KEY",
+    "MINIO_BUCKET_RAW",
+    "MINIO_BUCKET_SANITIZED",
+    "ANTHROPIC_API_KEY",
+    "JWT_PRIVATE_KEY_PATH",
+    "JWT_PUBLIC_KEY_PATH",
+    "PRIVACY_SALT",
+    "SENTRY_DSN",
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "NEXT_PUBLIC_API_URL",
+    "KAFKA_TOPIC_RAW_ARTICLES",
+    "KAFKA_TOPIC_SANITIZED_ARTICLES",
+    "KAFKA_TOPIC_EXTRACTED_EVENTS",
+    "KAFKA_TOPIC_RESOLVED_EVENTS",
+    "KAFKA_TOPIC_LOW_CONFIDENCE",
+    "API_RATE_LIMIT_PUBLIC",
+    "API_RATE_LIMIT_API_KEY",
+    "CORS_ORIGINS",
+    "LOG_LEVEL",
+    "ENVIRONMENT",
+    "NODE_ENV"
+  ],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json", "package.json"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tests/**", "test/**", "**/*.test.ts", "**/*.spec.ts"],
+      "outputs": ["coverage/**"]
+    },
+    "lint": {
+      "inputs": ["src/**", "*.ts", "*.tsx", "*.js", "*.jsx", ".eslintrc*", "eslint.config.*"],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

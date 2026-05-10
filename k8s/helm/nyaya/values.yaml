@@ -1,0 +1,70 @@
+replicaCount:
+  api: 2
+  frontend: 2
+  privacyEngine: 2
+  aiExtractor: 2
+  entityResolver: 2
+  timelineEngine: 2
+  persistenceWorker: 2
+
+image:
+  registry: ghcr.io/nyaya-platform
+  tag: latest
+  pullPolicy: IfNotPresent
+
+api:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  hpa:
+    minReplicas: 2
+    maxReplicas: 10
+    cpuThreshold: 70
+
+frontend:
+  publicApiUrl: "https://api.nyaya.org.in"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    api: api.nyaya.org.in
+    frontend: nyaya.org.in
+  tls:
+    enabled: true
+    apiSecret: nyaya-tls
+    frontendSecret: nyaya-tls-frontend
+
+monitoring:
+  prometheus:
+    enabled: true
+  grafana:
+    enabled: true
+
+kafka:
+  bootstrapServers: kafka:9092
+
+postgres:
+  host: postgres
+  port: 5432
+  database: nyaya
+
+redis:
+  url: redis://redis:6379/0
+
+opensearch:
+  host: opensearch
+  port: 9200

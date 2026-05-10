@@ -1,0 +1,14 @@
+apiVersion: v2
+name: nyaya
+description: Nyaya Justice Transparency Platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - justice
+  - transparency
+  - india
+  - women
+maintainers:
+  - name: Nyaya Platform
+    url: https://github.com/nyaya-platform/nyaya-platform

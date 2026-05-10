@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "cases": "प्रकरणे",
+    "map": "नकाशा",
+    "about": "माहिती"
+  },
+  "home": {
+    "title": "न्याय पारदर्शकता",
+    "subtitle": "FIR पासून शिक्षेपर्यंत — भारतीय न्यायव्यवस्थेत महिलांवरील गुन्ह्यांचा मागोवा.",
+    "search_placeholder": "राज्य, गुन्ह्याचा प्रकार, न्यायालयाने शोधा…",
+    "search_button": "शोधा",
+    "recent_title": "अलीकडील प्रकरणे",
+    "view_all": "सर्व प्रकरणे पाहा →",
+    "no_cases": "अद्याप कोणतेही प्रकरण नाही."
+  },
+  "stats": {
+    "total_cases": "एकूण प्रकरणे",
+    "convictions": "शिक्षा",
+    "states": "राज्ये",
+    "pocso": "POCSO प्रकरणे",
+    "fast_track": "जलद न्यायालय प्रकरणे",
+    "conviction_rate": "शिक्षा दर"
+  },
+  "badges": {
+    "pocso": "POCSO",
+    "fast_track": "जलद न्यायालय",
+    "convicted": "✓ शिक्षा",
+    "severely_delayed": "अत्यंत विलंबित",
+    "delayed": "विलंबित",
+    "within_limit": "वेळेत"
+  }
+}

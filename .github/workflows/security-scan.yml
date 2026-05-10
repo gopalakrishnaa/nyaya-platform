@@ -1,0 +1,51 @@
+name: Weekly Security Scan
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6am UTC
+  workflow_dispatch:
+
+jobs:
+  trivy-scan:
+    name: Trivy Full Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+          severity: 'MEDIUM,HIGH,CRITICAL'
+
+  dependency-audit:
+    name: Python Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Audit Python dependencies
+        run: |
+          for dir in packages/shared-python apps/api services/*/; do
+            if [ -f "$dir/pyproject.toml" ]; then
+              echo "Auditing $dir..."
+              pip-audit --desc --fix --dry-run -r "$dir/pyproject.toml" || true
+            fi
+          done
+
+  owasp-zap:
+    name: OWASP ZAP Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: ZAP API scan
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: 'https://api-staging.nyaya.org.in/openapi.json'
+          fail_action: false

@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: nyaya-local
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'nyaya-api'
+    static_configs:
+      - targets: ['api:8000']
+    metrics_path: '/metrics'
+
+  - job_name: 'nyaya-privacy-engine'
+    static_configs:
+      - targets: ['privacy-engine:8001']
+
+  - job_name: 'nyaya-ai-extractor'
+    static_configs:
+      - targets: ['ai-extractor:8002']
+
+  - job_name: 'nyaya-entity-resolver'
+    static_configs:
+      - targets: ['entity-resolver:8003']
+
+  - job_name: 'nyaya-timeline-engine'
+    static_configs:
+      - targets: ['timeline-engine:8004']
+
+  - job_name: 'nyaya-persistence-worker'
+    static_configs:
+      - targets: ['persistence-worker:8005']
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
