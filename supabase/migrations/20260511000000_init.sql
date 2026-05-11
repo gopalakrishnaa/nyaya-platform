@@ -535,7 +535,7 @@ CREATE POLICY public_cases_policy ON cases
 
 -- Internal role sees everything
 CREATE POLICY internal_cases_policy ON cases
-  FOR ALL TO nyaya_internal
+  FOR ALL TO service_role
   USING (TRUE);
 
 -- Public users can only see approved/auto-approved events
@@ -545,7 +545,7 @@ CREATE POLICY public_events_policy ON case_events
 
 -- Internal role sees everything
 CREATE POLICY internal_events_policy ON case_events
-  FOR ALL TO nyaya_internal
+  FOR ALL TO service_role
   USING (TRUE);
 
 -- =============================================================================
