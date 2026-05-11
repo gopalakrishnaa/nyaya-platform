@@ -89,7 +89,7 @@ async function apiFetch<T>(
       if (v !== undefined && v !== null) url.searchParams.set(k, String(v))
     })
   }
-  const res = await fetch(url.toString(), { next: { revalidate: 60 } })
+  const res = await fetch(url.toString(), { cache: 'no-store' })
   if (!res.ok) {
     throw new Error(`API ${res.status}: ${path}`)
   }
