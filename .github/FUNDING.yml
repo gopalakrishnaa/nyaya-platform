@@ -1,9 +1,1 @@
-# Nyaya Platform — Funding / Sponsorship
-# GitHub will display a "Sponsor" button on the repository using this file.
-# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
-
-# Custom sponsorship link or contact email.
-# GitHub wraps mailto: links into the Sponsor button on the repo page.
-custom:
-  - "mailto:gkanegundi@gmail.com"
-  - "mailto:nyaya-platform@gmail.com"
+thanks_dev: # @gopalakrishnaa
