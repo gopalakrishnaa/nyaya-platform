@@ -143,3 +143,4 @@ Desktop.ini
 tmp/
 temp/
 .vercel
+.env*.local
