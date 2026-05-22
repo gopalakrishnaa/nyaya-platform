@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { api, type CaseDetail, type CaseEvent, type TimelineGap } from '@/lib/api'
+import { api, type CaseEvent, type TimelineGap } from '@/lib/api'
 import { StageProgressBar } from '@/components/StageProgressBar'
 import { GapAlert } from '@/components/GapAlert'
 import { SourceBadge } from '@/components/SourceBadge'
 import { ConfidencePill } from '@/components/ConfidencePill'
+
+export const dynamic = 'force-dynamic'
 
 const CATEGORY_LABELS: Record<string, string> = {
   RAPE: 'Rape', GANG_RAPE: 'Gang Rape', SEXUAL_ASSAULT: 'Sexual Assault',
@@ -56,12 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function CaseDetailPage({ params }: PageProps) {
-  let caseData: CaseDetail
-  try {
-    caseData = await api.cases.get(params.id)
-  } catch {
-    notFound()
-  }
+  const caseData = await api.cases.get(params.id).catch(() => notFound())
 
   const c = caseData
   const currentStage = CURRENT_STAGE_MAP[c.status] ?? 'FIR'
