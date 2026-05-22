@@ -34,7 +34,14 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tsconfig.json", "package.json"],
+      "inputs": [
+        "src/**",
+        "tsconfig.json",
+        "package.json",
+        "postcss.config.js",
+        "tailwind.config.ts",
+        "tailwind.config.js"
+      ],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
