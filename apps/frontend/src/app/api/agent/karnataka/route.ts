@@ -10,7 +10,7 @@
  */
 import { NextResponse } from 'next/server'
 import { generateObject } from 'ai'
-import { anthropic } from '@ai-sdk/anthropic'
+import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 
 export const runtime = 'nodejs'
@@ -146,7 +146,7 @@ export async function GET() {
 
   try {
     const { object } = await generateObject({
-      model: anthropic('claude-3-haiku-20240307'),
+      model: google('gemini-2.0-flash-exp'),
       schema: ExtractedCaseSchema,
       system: `You are a legal data extraction agent for the Nyaya platform — an open-source justice transparency system tracking crimes against women in India (nyayaplatform.vercel.app).
 
@@ -199,7 +199,7 @@ ${corpus}`,
         sources_fetched: unique.length,
         cases_extracted: cases.length,
         fetched_at: new Date().toISOString(),
-        model: 'claude-3-haiku-20240307',
+        model: 'gemini-2.0-flash-exp',
         pipeline: 'Google News RSS → Claude extraction (Nyaya Guidelines §4.2)',
       },
     })
