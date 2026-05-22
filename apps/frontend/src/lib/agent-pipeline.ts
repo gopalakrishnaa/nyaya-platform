@@ -129,7 +129,7 @@ export async function extractCases(state: string, articles: NewsItem[]): Promise
     .join('\n\n---\n\n')
 
   const { object } = await generateObject({
-    model: google('gemini-2.0-flash'),
+    model: google('gemini-flash-latest'),
     schema: ExtractedCaseSchema,
     system: `You are a legal data extraction agent for the Nyaya platform — tracking crimes against women in India.
 
