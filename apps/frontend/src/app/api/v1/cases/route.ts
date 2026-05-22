@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CASES } from '@/lib/mock-data'
+import { fuzzyMatch } from '@/lib/fuzzy'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -19,7 +20,7 @@ export function GET(req: NextRequest) {
 
   let items = [...CASES]
 
-  if (state) items = items.filter(c => c.state.toLowerCase() === state.toLowerCase())
+  if (state) items = items.filter(c => fuzzyMatch(state, c.state))
   if (crimeCategory) items = items.filter(c => c.crime_category === crimeCategory)
   if (status) items = items.filter(c => c.status === status)
   if (pocso === 'true') items = items.filter(c => c.pocso_applicable)
@@ -27,12 +28,11 @@ export function GET(req: NextRequest) {
   if (conviction === 'true') items = items.filter(c => c.conviction_achieved)
   if (year) items = items.filter(c => c.incident_date?.startsWith(year))
   if (q) {
-    const ql = q.toLowerCase()
     items = items.filter(c =>
-      c.state.toLowerCase().includes(ql) ||
-      c.district.toLowerCase().includes(ql) ||
-      c.crime_category.toLowerCase().includes(ql) ||
-      c.case_ref.toLowerCase().includes(ql)
+      fuzzyMatch(q, c.state) ||
+      fuzzyMatch(q, c.district) ||
+      c.crime_category.toLowerCase().includes(q.toLowerCase()) ||
+      c.case_ref.toLowerCase().includes(q.toLowerCase())
     )
   }
 

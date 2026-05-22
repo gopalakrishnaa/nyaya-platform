@@ -117,8 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # version read from packageManager field in package.json
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -133,6 +132,10 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read        # CodeQL needs this to query workflow run metadata
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
@@ -145,7 +148,7 @@ jobs:
           exit-code: '0'
           severity: 'HIGH,CRITICAL'
       - name: Upload Trivy SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'

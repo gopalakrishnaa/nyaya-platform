@@ -1,6 +1,11 @@
 import Link from 'next/link'
 import { api, type CaseSummary } from '@/lib/api'
 
+const STATES = [
+  'Andhra Pradesh', 'Bihar', 'Delhi', 'Karnataka', 'Madhya Pradesh',
+  'Maharashtra', 'Rajasthan', 'Tamil Nadu', 'Uttar Pradesh', 'West Bengal',
+]
+
 const CRIME_CATEGORIES = [
   'RAPE', 'GANG_RAPE', 'SEXUAL_ASSAULT', 'POCSO_VIOLATION', 'ACID_ATTACK',
   'DOMESTIC_VIOLENCE', 'DOWRY_DEATH', 'DOWRY_HARASSMENT', 'STALKING',
@@ -32,6 +37,7 @@ interface PageProps {
 
 export default async function CasesPage({ searchParams }: PageProps) {
   const page = parseInt(String(searchParams.page ?? '1'), 10)
+  const q = searchParams.q as string | undefined
   const state = searchParams.state as string | undefined
   const crime_category = searchParams.crime_category as string | undefined
   const status = searchParams.status as string | undefined
@@ -44,7 +50,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
   try {
     result = await api.cases.list({
       page, page_size: 20, state, crime_category, status,
-      pocso, fast_track, year, conviction,
+      pocso, fast_track, year, conviction, q,
     })
   } catch {
     // Show empty state on API unavailable
@@ -58,6 +64,25 @@ export default async function CasesPage({ searchParams }: PageProps) {
       <aside className="w-64 flex-shrink-0" aria-label="Case filters">
         <h2 className="font-semibold text-nyaya-navy mb-4">Filter Cases</h2>
         <form method="GET">
+          <FilterSection title="Search">
+            <input
+              type="text"
+              name="q"
+              defaultValue={q}
+              placeholder="State, district, case ref…"
+              className="w-full text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-nyaya-navy"
+            />
+          </FilterSection>
+
+          <FilterSection title="State">
+            <select name="state" className="w-full text-sm border rounded px-2 py-1.5">
+              <option value="">All states</option>
+              {STATES.map((s) => (
+                <option key={s} value={s} selected={state === s}>{s}</option>
+              ))}
+            </select>
+          </FilterSection>
+
           <FilterSection title="Crime Type">
             <select name="crime_category" className="w-full text-sm border rounded px-2 py-1.5">
               <option value="">All types</option>
