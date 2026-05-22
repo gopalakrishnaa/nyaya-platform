@@ -135,6 +135,7 @@ jobs:
     permissions:
       security-events: write
       contents: read
+      actions: read        # CodeQL needs this to query workflow run metadata
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
