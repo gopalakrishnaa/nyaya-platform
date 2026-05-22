@@ -44,7 +44,7 @@ async function fetchNewsRss(query: string): Promise<NewsItem[]> {
     const xml = await res.text()
     const items: NewsItem[] = []
 
-    for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+    for (const m of Array.from(xml.matchAll(/<item>([\s\S]*?)<\/item>/g))) {
       const raw = m[1]
       const title =
         raw.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ??
