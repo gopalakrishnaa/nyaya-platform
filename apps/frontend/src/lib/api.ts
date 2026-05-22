@@ -1,10 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-
-// Basic client for unauthenticated data fetching (honors RLS for PUBLIC)
-const supabase = createClient(supabaseUrl, supabaseKey)
+/**
+ * API client — calls Next.js API routes (/api/v1/...) which serve mock data.
+ * Works identically in local dev and on Vercel — no external services needed.
+ */
 
 export interface CaseSummary {
   id: string
@@ -72,6 +69,14 @@ export interface PlatformStats {
   total_fast_track: number
 }
 
+export interface GeoStat {
+  state: string
+  state_code: string
+  total_cases: number
+  conviction_rate: number
+  avg_delay_days: number
+}
+
 export interface CaseListParams {
   page?: number
   page_size?: number
@@ -83,98 +88,48 @@ export interface CaseListParams {
   year?: number
   conviction?: boolean
   sort?: string
+  q?: string
+}
+
+// In SSR context (server components) we need an absolute URL.
+// In browser context a relative path works fine.
+function apiBase(): string {
+  if (typeof window === 'undefined') {
+    // Server-side: use VERCEL_URL or fallback to localhost
+    const host = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+    return host
+  }
+  return ''
+}
+
+async function apiFetch<T>(path: string, params?: Record<string, string | number | boolean | undefined | null>): Promise<T> {
+  const url = new URL(`${apiBase()}${path}`, typeof window === 'undefined' ? undefined : window.location.href)
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v))
+    })
+  }
+  const res = await fetch(url.toString(), { cache: 'no-store' })
+  if (!res.ok) throw new Error(`API ${res.status}: ${path}`)
+  return res.json() as Promise<T>
 }
 
 export const api = {
   cases: {
-    list: async (params: CaseListParams) => {
-      const page = params.page ?? 1
-      const pageSize = params.page_size ?? 20
-      const start = (page - 1) * pageSize
-      const end = start + pageSize - 1
-
-      let query = supabase.from('cases').select('*', { count: 'exact' })
-
-      if (params.state) query = query.eq('state', params.state)
-      if (params.crime_category) query = query.eq('crime_category', params.crime_category)
-      if (params.status) query = query.eq('status', params.status)
-      if (params.pocso !== undefined) query = query.eq('pocso_applicable', params.pocso)
-      if (params.fast_track !== undefined) query = query.eq('fast_track_court', params.fast_track)
-      if (params.conviction !== undefined) query = query.eq('conviction_achieved', params.conviction)
-      
-      if (params.year) {
-        query = query.gte('incident_date', `${params.year}-01-01`).lte('incident_date', `${params.year}-12-31`)
-      }
-
-      // Default sorting by last event
-      query = query.order('last_event_at', { ascending: false, nullsFirst: false })
-
-      const { data, count, error } = await query.range(start, end)
-      
-      if (error) {
-        console.error("Supabase error fetching cases list:", error)
-        throw new Error(error.message)
-      }
-
-      return {
-        items: data as CaseSummary[],
-        total: count ?? 0,
-        page,
-        page_size: pageSize
-      }
-    },
-    get: async (id: string) => {
-      const [caseData, eventsData] = await Promise.all([
-        supabase.from('cases').select('*').eq('id', id).single(),
-        supabase.from('case_events').select('*').eq('case_id', id).order('event_date', { ascending: false })
-      ])
-
-      if (caseData.error) throw new Error(caseData.error.message)
-      
-      const detail: CaseDetail = {
-        ...(caseData.data as CaseSummary),
-        events: (eventsData.data ?? []) as CaseEvent[]
-      }
-      return detail
-    },
-    events: async (id: string) => {
-      const { data, error } = await supabase.from('case_events')
-        .select('*')
-        .eq('case_id', id)
-        .order('event_date', { ascending: false })
-      
-      if (error) throw new Error(error.message)
-      return data as CaseEvent[]
-    },
+    list: (params: CaseListParams) =>
+      apiFetch<{ items: CaseSummary[]; total: number; page: number; page_size: number }>(
+        '/api/v1/cases',
+        params as Record<string, string>,
+      ),
+    get: (id: string) =>
+      apiFetch<CaseDetail>(`/api/v1/cases/${id}`),
   },
-  search: async (q: string, filters?: Record<string, string | number | boolean>) => {
-    // Basic fallback for search using Postgres text search instead of OpenSearch
-    let query = supabase.from('cases').select('*', { count: 'exact' }).textSearch('case_ref', q)
-    const { data, count, error } = await query.limit(20)
-    
-    return {
-      items: (data ?? []) as CaseSummary[],
-      total: count ?? 0,
-      aggregations: {}
-    }
-  },
+  search: (q: string, page = 1, pageSize = 20) =>
+    apiFetch<{ items: CaseSummary[]; total: number }>('/api/v1/search', { q, page, page_size: pageSize }),
   stats: {
-    summary: async () => {
-      // Basic mock since we don't have the API stats aggregation endpoint
-      return {
-        total_cases: 0,
-        total_convictions: 0,
-        states_covered: 0,
-        avg_conviction_rate: 0,
-        total_pocso: 0,
-        total_fast_track: 0
-      }
-    },
-    geo: async (state?: string) => {
-      const query = supabase.from('geo_aggregates').select('*')
-      if (state) query.eq('state', state)
-      const { data } = await query
-      return data ?? []
-    },
+    summary: () => apiFetch<PlatformStats>('/api/v1/stats/summary'),
+    geo: () => apiFetch<GeoStat[]>('/api/v1/stats/geo'),
   },
 }
