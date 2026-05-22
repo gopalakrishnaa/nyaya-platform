@@ -161,10 +161,26 @@ export interface LiveCase extends ExtractedCase {
   created_at: string
 }
 
+/** Normalize incident_date — DB expects DATE (YYYY-MM-DD) or null */
+function sanitizeDate(d: string | null): string | null {
+  if (!d) return null
+  // Full ISO date already
+  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10)
+  // Year only e.g. "2024" → null (too imprecise for DATE column)
+  if (/^\d{4}$/.test(d)) return null
+  // Year-Month e.g. "2024-08" → first of month
+  if (/^\d{4}-\d{2}$/.test(d)) return `${d}-01`
+  // Try parsing
+  const parsed = new Date(d)
+  if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10)
+  return null
+}
+
 export function buildLiveCase(state: string, c: ExtractedCase, runId: string, idx: number): LiveCase {
   const ts = Date.now()
   return {
     ...c,
+    incident_date: sanitizeDate(c.incident_date),
     id: `live-${state.slice(0, 3).toLowerCase()}-${ts}-${idx}`,
     case_ref: `NYA-LIVE-${state.slice(0, 2).toUpperCase()}-${new Date().getFullYear()}-${String(idx + 1).padStart(4, '0')}`,
     state,
