@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { requireToken } from '@/lib/auth'
-import { makeAdminApi } from '@/lib/api'
+import { makeAdminApi, AdminCaseSummary } from '@/lib/api'
 import { CasesTable } from './CasesTable'
 
 export const metadata: Metadata = { title: 'Cases' }
@@ -16,7 +16,7 @@ export default async function AdminCasesPage({ searchParams }: PageProps) {
   const page = parseInt(searchParams.page ?? '1', 10)
   const state = searchParams.state
 
-  let data = { items: [], total: 0 }
+  let data: { items: AdminCaseSummary[]; total: number } = { items: [], total: 0 }
   try {
     data = await api.cases.list({ page, page_size: 25, state })
   } catch {

@@ -1,4 +1,7 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+/**
+ * API client — calls Next.js API routes (/api/v1/...) which serve mock data.
+ * Works identically in local dev and on Vercel — no external services needed.
+ */
 
 export interface CaseSummary {
   id: string
@@ -66,6 +69,14 @@ export interface PlatformStats {
   total_fast_track: number
 }
 
+export interface GeoStat {
+  state: string
+  state_code: string
+  total_cases: number
+  conviction_rate: number
+  avg_delay_days: number
+}
+
 export interface CaseListParams {
   page?: number
   page_size?: number
@@ -77,22 +88,31 @@ export interface CaseListParams {
   year?: number
   conviction?: boolean
   sort?: string
+  q?: string
 }
 
-async function apiFetch<T>(
-  path: string,
-  params?: Record<string, string | number | boolean | undefined>,
-): Promise<T> {
-  const url = new URL(`${API_BASE}${path}`)
+// In SSR context (server components) we need an absolute URL.
+// In browser context a relative path works fine.
+function apiBase(): string {
+  if (typeof window === 'undefined') {
+    // Server-side: use VERCEL_URL or fallback to localhost
+    const host = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+    return host
+  }
+  return ''
+}
+
+async function apiFetch<T>(path: string, params?: Record<string, string | number | boolean | undefined | null>): Promise<T> {
+  const url = new URL(`${apiBase()}${path}`, typeof window === 'undefined' ? undefined : window.location.href)
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null) url.searchParams.set(k, String(v))
     })
   }
-  const res = await fetch(url.toString(), { next: { revalidate: 60 } })
-  if (!res.ok) {
-    throw new Error(`API ${res.status}: ${path}`)
-  }
+  const res = await fetch(url.toString(), { cache: 'no-store' })
+  if (!res.ok) throw new Error(`API ${res.status}: ${path}`)
   return res.json() as Promise<T>
 }
 
@@ -100,21 +120,16 @@ export const api = {
   cases: {
     list: (params: CaseListParams) =>
       apiFetch<{ items: CaseSummary[]; total: number; page: number; page_size: number }>(
-        '/v1/cases',
+        '/api/v1/cases',
         params as Record<string, string>,
       ),
-    get: (id: string) => apiFetch<CaseDetail>(`/v1/cases/${id}`),
-    events: (id: string) => apiFetch<CaseEvent[]>(`/v1/cases/${id}/events`),
+    get: (id: string) =>
+      apiFetch<CaseDetail>(`/api/v1/cases/${id}`),
   },
-  search: (q: string, filters?: Record<string, string | number | boolean>) =>
-    apiFetch<{
-      items: CaseSummary[]
-      total: number
-      aggregations: Record<string, unknown>
-    }>('/v1/search', { q, ...filters }),
+  search: (q: string, page = 1, pageSize = 20) =>
+    apiFetch<{ items: CaseSummary[]; total: number }>('/api/v1/search', { q, page, page_size: pageSize }),
   stats: {
-    summary: () => apiFetch<PlatformStats>('/v1/stats/summary'),
-    geo: (state?: string) =>
-      apiFetch<unknown[]>('/v1/stats/geo', state ? { state } : undefined),
+    summary: () => apiFetch<PlatformStats>('/api/v1/stats/summary'),
+    geo: () => apiFetch<GeoStat[]>('/api/v1/stats/geo'),
   },
 }

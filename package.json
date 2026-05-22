@@ -5,7 +5,7 @@
   "workspaces": ["apps/*", "packages/*", "services/*"],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
+    "build": "turbo run build --filter=@nyaya/frontend",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check"
@@ -18,5 +18,5 @@
     "node": "20.x",
     "pnpm": ">=9.0.0"
   },
-  "packageManager": "npm@11.11.0"
+  "packageManager": "pnpm@9.15.0"
 }

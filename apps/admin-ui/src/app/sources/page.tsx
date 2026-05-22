@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { requireToken } from '@/lib/auth'
-import { makeAdminApi } from '@/lib/api'
+import { makeAdminApi, Source } from '@/lib/api'
 import { SourcesManager } from './SourcesManager'
 
 export const metadata: Metadata = { title: 'Sources' }
@@ -9,7 +9,7 @@ export default async function SourcesPage() {
   const token = requireToken()
   const api = makeAdminApi(token)
 
-  let sources = []
+  let sources: Source[] = []
   try {
     sources = await api.sources.list()
   } catch {
