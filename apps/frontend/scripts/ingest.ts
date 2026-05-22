@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
 import { generateObject } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { google } from '@ai-sdk/google';
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -16,10 +16,6 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
 }
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-});
 
 const parser = new Parser();
 
