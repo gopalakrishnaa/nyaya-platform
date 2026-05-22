@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
 import { generateObject } from 'ai';
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -17,8 +17,8 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const anthropic = createAnthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 });
 
 const parser = new Parser();
@@ -101,7 +101,7 @@ async function processArticle(item: any) {
   console.log('Extracting structured data using Claude...');
   try {
     const { object: extracted } = await generateObject({
-      model: anthropic('claude-3-5-sonnet-20241022'),
+      model: google('gemini-2.0-flash-exp'),
       schema: ExtractionSchema,
       prompt: `Analyze the following news article and extract details about the legal case related to gender-based violence in India. If it's not a specific case (e.g., general statistics, opinion piece), set is_relevant to false.\n\nArticle Title: ${item.title}\n\nArticle Text:\n${content}`
     });
