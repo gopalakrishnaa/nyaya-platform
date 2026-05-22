@@ -52,6 +52,9 @@ export default function RootLayout({
                 <Link href="/map" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium">
                   Map
                 </Link>
+                <Link href="/live" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium flex items-center gap-1">
+                  <span>🤖</span> Live
+                </Link>
                 <Link href="/about" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium">
                   About
                 </Link>
