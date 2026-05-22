@@ -22,16 +22,16 @@ export async function GET() {
         '2. Run supabase/migrations/001_live_cases.sql in SQL Editor',
         '3. Copy URL + service_role key from Project Settings → API',
         '4. Add to Vercel: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY',
-        '5. Add ANTHROPIC_API_KEY from https://console.anthropic.com/settings/keys',
+        '5. Add GOOGLE_GENERATIVE_AI_API_KEY from https://aistudio.google.com/app/apikey',
         '6. Redeploy',
       ],
     })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return NextResponse.json({
       configured: false,
-      setup: ['Add ANTHROPIC_API_KEY in Vercel → Environment Variables → Redeploy'],
+      setup: ['Add GOOGLE_GENERATIVE_AI_API_KEY in Vercel → Environment Variables → Redeploy'],
     })
   }
 
@@ -62,7 +62,7 @@ export async function GET() {
 
 // POST — create run record, return run ID + states to process
 export async function POST(req: NextRequest) {
-  if (!isSupabaseConfigured() || !process.env.ANTHROPIC_API_KEY) {
+  if (!isSupabaseConfigured() || !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return NextResponse.json({ error: 'Not configured. GET /api/agent/india for setup steps.' }, { status: 503 })
   }
 

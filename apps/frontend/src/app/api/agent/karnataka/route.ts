@@ -6,7 +6,7 @@
  * 2. EXTRACT — Claude parses articles → structured case objects (IPC sections, dates, districts)
  * 3. RESPOND — return CaseSummary-compatible JSON
  *
- * Requires: ANTHROPIC_API_KEY env var set in Vercel project settings.
+ * Requires: GOOGLE_GENERATIVE_AI_API_KEY env var set in Vercel project settings.
  */
 import { NextResponse } from 'next/server'
 import { generateObject } from 'ai'
@@ -103,11 +103,11 @@ const ExtractedCaseSchema = z.object({
 // ── 3. ROUTE ──────────────────────────────────────────────────────────────────
 
 export async function GET() {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return NextResponse.json(
       {
-        error: 'ANTHROPIC_API_KEY not configured',
-        setup: 'Add ANTHROPIC_API_KEY in Vercel project → Settings → Environment Variables, then redeploy.',
+        error: 'GOOGLE_GENERATIVE_AI_API_KEY not configured',
+        setup: 'Add GOOGLE_GENERATIVE_AI_API_KEY in Vercel project → Settings → Environment Variables, then redeploy.',
       },
       { status: 503 }
     )

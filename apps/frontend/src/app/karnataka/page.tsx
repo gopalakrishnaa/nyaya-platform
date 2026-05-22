@@ -140,7 +140,7 @@ export default function KarnatakaAgentPage() {
           <ol className="text-sm text-amber-700 space-y-1 list-decimal list-inside">
             <li>Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="underline">console.anthropic.com</a></li>
             <li>Go to <strong>Vercel → nyayaplatform → Settings → Environment Variables</strong></li>
-            <li>Add <code className="bg-amber-100 px-1 rounded">ANTHROPIC_API_KEY</code> = your key</li>
+            <li>Add <code className="bg-amber-100 px-1 rounded">GOOGLE_GENERATIVE_AI_API_KEY</code> = your key</li>
             <li>Redeploy</li>
           </ol>
         </div>
