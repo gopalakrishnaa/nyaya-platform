@@ -2,7 +2,7 @@
  * Nyaya AI Extraction Pipeline — Guidelines §4.2
  *
  * Ingest → Extract → Store
- * Google News RSS  →  Claude Haiku  →  Supabase live_cases
+ * Google News RSS  →  Google Gemini Flash  →  Supabase live_cases
  */
 export const ALL_INDIA_STATES = [
   'Maharashtra', 'Uttar Pradesh', 'Rajasthan', 'Delhi', 'West Bengal',
@@ -12,7 +12,7 @@ export const ALL_INDIA_STATES = [
 ]
 
 import { generateObject } from 'ai'
-import { anthropic } from '@ai-sdk/anthropic'
+import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 
 // ── INGEST ────────────────────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ export async function extractCases(state: string, articles: NewsItem[]): Promise
     .join('\n\n---\n\n')
 
   const { object } = await generateObject({
-    model: anthropic('claude-3-haiku-20240307'),
+    model: google('gemini-2.0-flash-exp'),
     schema: ExtractedCaseSchema,
     system: `You are a legal data extraction agent for the Nyaya platform — tracking crimes against women in India.
 
