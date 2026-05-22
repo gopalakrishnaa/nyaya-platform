@@ -1,5 +1,3 @@
-'use server'
-
 import { cookies } from 'next/headers'
 
 const TOKEN_COOKIE = 'nyaya_admin_token'

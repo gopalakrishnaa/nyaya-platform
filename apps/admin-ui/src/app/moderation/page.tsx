@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { requireToken } from '@/lib/auth'
-import { makeAdminApi } from '@/lib/api'
+import { makeAdminApi, ModerationItem } from '@/lib/api'
 import { ModerationQueue } from './ModerationQueue'
 
 export const metadata: Metadata = { title: 'Moderation Queue' }
@@ -16,7 +16,7 @@ export default async function ModerationPage({ searchParams }: PageProps) {
   const status = searchParams.status ?? 'PENDING'
   const page = parseInt(searchParams.page ?? '1', 10)
 
-  let data = { items: [], total: 0 }
+  let data: { items: ModerationItem[]; total: number } = { items: [], total: 0 }
   try {
     data = await api.moderation.list({ status, page, page_size: 25 })
   } catch {

@@ -11,6 +11,9 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('WARNING: SUPABASE_SERVICE_ROLE_KEY is not defined in .env.local. Falling back to NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY. Database writes might fail due to Row Level Security (RLS) policies.');
+}
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -138,11 +141,10 @@ async function processArticle(item: any) {
       const eventsToInsert = extracted.events.map(e => ({
         case_id: caseData.id,
         event_date: e.event_date || new Date().toISOString().split('T')[0],
-        category: e.event_category,
+        event_category: e.event_category,
         event_type: e.event_type,
-        title: `${e.event_type.replace(/_/g, ' ')}`,
-        description: e.event_description,
-        source_url: item.link
+        summary: e.event_description,
+        source_attribution: [{ url: item.link }]
       }));
 
       const { error: eventError } = await supabase

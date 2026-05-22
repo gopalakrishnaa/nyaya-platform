@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { requireToken } from '@/lib/auth'
-import { makeAdminApi } from '@/lib/api'
+import { makeAdminApi, AuditLogEntry } from '@/lib/api'
 
 export const metadata: Metadata = { title: 'Audit Log' }
 
@@ -15,7 +15,7 @@ export default async function AuditLogPage({ searchParams }: PageProps) {
   const page = parseInt(searchParams.page ?? '1', 10)
   const resource_type = searchParams.resource_type
 
-  let data = { items: [], total: 0 }
+  let data: { items: AuditLogEntry[]; total: number } = { items: [], total: 0 }
   try {
     data = await api.auditLog.list({ page, page_size: 50, resource_type })
   } catch {
