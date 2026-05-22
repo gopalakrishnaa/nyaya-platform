@@ -146,7 +146,7 @@ export async function GET() {
 
   try {
     const { object } = await generateObject({
-      model: google('gemini-2.0-flash-exp'),
+      model: google('gemini-1.5-flash'),
       schema: ExtractedCaseSchema,
       system: `You are a legal data extraction agent for the Nyaya platform — an open-source justice transparency system tracking crimes against women in India (nyayaplatform.vercel.app).
 
@@ -199,7 +199,7 @@ ${corpus}`,
         sources_fetched: unique.length,
         cases_extracted: cases.length,
         fetched_at: new Date().toISOString(),
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-1.5-flash',
         pipeline: 'Google News RSS → Claude extraction (Nyaya Guidelines §4.2)',
       },
     })
