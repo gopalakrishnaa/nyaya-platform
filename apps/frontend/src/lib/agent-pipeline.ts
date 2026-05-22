@@ -4,6 +4,13 @@
  * Ingest → Extract → Store
  * Google News RSS  →  Claude Haiku  →  Supabase live_cases
  */
+export const ALL_INDIA_STATES = [
+  'Maharashtra', 'Uttar Pradesh', 'Rajasthan', 'Delhi', 'West Bengal',
+  'Karnataka', 'Tamil Nadu', 'Madhya Pradesh', 'Bihar', 'Andhra Pradesh',
+  'Gujarat', 'Haryana', 'Punjab', 'Telangana', 'Odisha',
+  'Kerala', 'Jharkhand', 'Chhattisgarh', 'Assam', 'Uttarakhand',
+]
+
 import { generateObject } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { z } from 'zod'

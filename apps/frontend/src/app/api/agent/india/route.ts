@@ -7,16 +7,10 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { isSupabaseConfigured, getServiceClient } from '@/lib/supabase-server'
+import { ALL_INDIA_STATES } from '@/lib/agent-pipeline'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-export const ALL_INDIA_STATES = [
-  'Maharashtra', 'Uttar Pradesh', 'Rajasthan', 'Delhi', 'West Bengal',
-  'Karnataka', 'Tamil Nadu', 'Madhya Pradesh', 'Bihar', 'Andhra Pradesh',
-  'Gujarat', 'Haryana', 'Punjab', 'Telangana', 'Odisha',
-  'Kerala', 'Jharkhand', 'Chhattisgarh', 'Assam', 'Uttarakhand',
-]
 
 // GET — return last run stats + stored case counts
 export async function GET() {
