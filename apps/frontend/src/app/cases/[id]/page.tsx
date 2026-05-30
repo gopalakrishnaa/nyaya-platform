@@ -1,12 +1,11 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { api, type CaseEvent, type TimelineGap } from '@/lib/api'
+import { getCaseDetail } from '@/lib/mock-data'
+import type { CaseEvent, TimelineGap } from '@/lib/api'
 import { StageProgressBar } from '@/components/StageProgressBar'
 import { GapAlert } from '@/components/GapAlert'
 import { SourceBadge } from '@/components/SourceBadge'
 import { ConfidencePill } from '@/components/ConfidencePill'
-
-export const dynamic = 'force-dynamic'
 
 const CATEGORY_LABELS: Record<string, string> = {
   RAPE: 'Rape', GANG_RAPE: 'Gang Rape', SEXUAL_ASSAULT: 'Sexual Assault',
@@ -45,22 +44,20 @@ interface PageProps {
   params: { id: string }
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  try {
-    const c = await api.cases.get(params.id)
-    return {
-      title: `${c.case_ref} — ${CATEGORY_LABELS[c.crime_category] ?? c.crime_category}`,
-      description: `Case in ${c.district}, ${c.state}. Status: ${c.status.replace(/_/g, ' ')}.`,
-    }
-  } catch {
-    return { title: 'Case Detail' }
+export function generateMetadata({ params }: PageProps): Metadata {
+  const c = getCaseDetail(params.id)
+  if (!c) return { title: 'Case Detail' }
+  return {
+    title: `${c.case_ref} — ${CATEGORY_LABELS[c.crime_category] ?? c.crime_category}`,
+    description: `Case in ${c.district}, ${c.state}. Status: ${c.status.replace(/_/g, ' ')}.`,
   }
 }
 
-export default async function CaseDetailPage({ params }: PageProps) {
-  const caseData = await api.cases.get(params.id).catch(() => notFound())
+export default function CaseDetailPage({ params }: PageProps) {
+  const raw = getCaseDetail(params.id)
+  if (!raw) notFound()
+  const c = raw!
 
-  const c = caseData
   const currentStage = CURRENT_STAGE_MAP[c.status] ?? 'FIR'
   const statusColor = STATUS_COLORS[c.status] ?? 'bg-gray-100 text-gray-700'
 
