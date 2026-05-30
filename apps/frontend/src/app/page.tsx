@@ -1,22 +1,26 @@
 import Link from 'next/link'
-import { api } from '@/lib/api'
+import { CASES } from '@/lib/mock-data'
 import type { PlatformStats } from '@/lib/api'
 
-async function getStats(): Promise<PlatformStats | null> {
-  try {
-    return await api.stats.summary()
-  } catch {
-    return null
+function getStats(): PlatformStats {
+  const convictions = CASES.filter(c => c.conviction_achieved).length
+  const states = new Set(CASES.map(c => c.state)).size
+  const pocso = CASES.filter(c => c.pocso_applicable).length
+  const fastTrack = CASES.filter(c => c.fast_track_court).length
+  return {
+    total_cases: CASES.length,
+    total_convictions: convictions,
+    states_covered: states,
+    avg_conviction_rate: convictions / CASES.length,
+    total_pocso: pocso,
+    total_fast_track: fastTrack,
   }
 }
 
-async function getRecentCases() {
-  try {
-    const result = await api.cases.list({ page: 1, page_size: 10, sort: 'last_event_at' })
-    return result.items
-  } catch {
-    return []
-  }
+function getRecentCases() {
+  return [...CASES]
+    .sort((a, b) => (b.last_event_at ?? '').localeCompare(a.last_event_at ?? ''))
+    .slice(0, 3)
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -27,8 +31,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   TRAFFICKING: 'Trafficking', OTHER: 'Other',
 }
 
-export default async function HomePage() {
-  const [stats, recentCases] = await Promise.all([getStats(), getRecentCases()])
+export default function HomePage() {
+  const stats = getStats()
+  const recentCases = getRecentCases()
 
   return (
     <div>
@@ -41,8 +46,6 @@ export default async function HomePage() {
           Tracking crimes against women through India&apos;s legal system — from FIR to conviction.
           Every case, every delay, every outcome — publicly documented.
         </p>
-
-        {/* Search bar */}
         <form action="/cases" method="GET" className="max-w-xl mx-auto">
           <div className="flex gap-2">
             <input
@@ -63,19 +66,14 @@ export default async function HomePage() {
       </section>
 
       {/* Stats */}
-      {stats && (
-        <section className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12" aria-label="Platform statistics">
-          <StatCard label="Total Cases" value={stats.total_cases.toLocaleString('en-IN')} />
-          <StatCard label="Convictions" value={stats.total_convictions.toLocaleString('en-IN')} />
-          <StatCard label="States Covered" value={stats.states_covered.toString()} />
-          <StatCard label="POCSO Cases" value={stats.total_pocso.toLocaleString('en-IN')} />
-          <StatCard label="Fast-Track Cases" value={stats.total_fast_track.toLocaleString('en-IN')} />
-          <StatCard
-            label="Conviction Rate"
-            value={`${(stats.avg_conviction_rate * 100).toFixed(1)}%`}
-          />
-        </section>
-      )}
+      <section className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12" aria-label="Platform statistics">
+        <StatCard label="Total Cases" value={stats.total_cases.toLocaleString('en-IN')} />
+        <StatCard label="Convictions" value={stats.total_convictions.toLocaleString('en-IN')} />
+        <StatCard label="States Covered" value={stats.states_covered.toString()} />
+        <StatCard label="POCSO Cases" value={stats.total_pocso.toLocaleString('en-IN')} />
+        <StatCard label="Fast-Track Cases" value={stats.total_fast_track.toLocaleString('en-IN')} />
+        <StatCard label="Conviction Rate" value={`${(stats.avg_conviction_rate * 100).toFixed(1)}%`} />
+      </section>
 
       {/* Recent updates */}
       <section>
@@ -85,54 +83,43 @@ export default async function HomePage() {
             View all cases →
           </Link>
         </div>
-
-        {recentCases.length === 0 ? (
-          <p className="text-gray-500 text-center py-12">No cases loaded yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {recentCases.map((c) => (
-              <li key={c.id}>
-                <Link
-                  href={`/cases/${c.id}`}
-                  className="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:border-nyaya-navy hover:shadow-sm transition-all"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs text-gray-500">{c.case_ref}</span>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-medium">
-                        {CATEGORY_LABELS[c.crime_category] ?? c.crime_category}
-                      </span>
-                      {c.pocso_applicable && (
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-orange-100 text-orange-700">
-                          POCSO
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {c.district}, {c.state}
-                      {c.last_event_at && (
-                        <span className="ml-2 text-gray-400">
-                          — {new Date(c.last_event_at).toLocaleDateString('en-IN')}
-                        </span>
-                      )}
-                    </p>
+        <ul className="space-y-3">
+          {recentCases.map((c) => (
+            <li key={c.id}>
+              <Link
+                href={`/cases/${c.id}`}
+                className="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:border-nyaya-navy hover:shadow-sm transition-all"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-xs text-gray-500">{c.case_ref}</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-medium">
+                      {CATEGORY_LABELS[c.crime_category] ?? c.crime_category}
+                    </span>
+                    {c.pocso_applicable && (
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-orange-100 text-orange-700">POCSO</span>
+                    )}
                   </div>
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${
-                      c.status === 'CLOSED_CONVICTED'
-                        ? 'bg-green-100 text-green-700'
-                        : c.status === 'CLOSED_ACQUITTED'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}
-                  >
-                    {c.status.replace(/_/g, ' ')}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+                  <p className="text-sm text-gray-600 mt-1">
+                    {c.district}, {c.state}
+                    {c.last_event_at && (
+                      <span className="ml-2 text-gray-400">
+                        — {new Date(c.last_event_at).toLocaleDateString('en-IN')}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <span className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${
+                  c.status === 'CLOSED_CONVICTED' ? 'bg-green-100 text-green-700' :
+                  c.status === 'CLOSED_ACQUITTED' ? 'bg-red-100 text-red-700' :
+                  'bg-gray-100 text-gray-600'
+                }`}>
+                  {c.status.replace(/_/g, ' ')}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   )
