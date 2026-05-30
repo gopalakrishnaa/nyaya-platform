@@ -51,18 +51,16 @@ export function makeCase(idx: number): CaseSummary {
   const district = rng.choice(DISTRICTS[state])
   const category = rng.choice(CATEGORIES)
   const status = rng.choice(STATUSES)
-  const year = rng.randint(2021, 2026)
-  const maxMonth = year === 2026 ? 5 : 12
-  const month = rng.randint(1, maxMonth)
-  const maxDay = year === 2026 && month === 5 ? 10 : 28
-  const day = rng.randint(1, maxDay)
+  const year = rng.randint(2021, 2024)
+  const month = rng.randint(1, 12)
+  const day = rng.randint(1, 28)
   const stateCode = state.slice(0, 2).toUpperCase()
   const pocso = category === 'POCSO_VIOLATION' || rng.random() < 0.15
   const fastTrack = rng.random() < 0.3
   const convicted = status === 'CLOSED_CONVICTED'
   const incidentDate = `${year}-${pad2(month)}-${pad2(day)}`
   const eventCount = rng.randint(2, 12)
-  const lastEventDays = rng.randint(30, 900)
+  const lastEventDays = rng.randint(30, 400)
   const lastEventAt = addDays(incidentDate, lastEventDays) + 'T00:00:00'
   const ipcCount = rng.randint(1, 3)
   const ipcSections = rng.sample(IPC_SECTIONS, ipcCount)
