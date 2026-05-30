@@ -106,7 +106,7 @@ export default function LivePage() {
       const state = ALL_STATES[i]
       setStateRuns(prev => prev.map(r => r.state === state ? { ...r, status: 'running' } : r))
       try {
-        const res = await fetch(`/api/agent/india/${encodeURIComponent(state)}?run_id=${run_id}`)
+        const res = await fetch(`/api/agent/india/${encodeURIComponent(state)}?run_id=${run_id}&t=${Date.now()}`, { cache: 'no-store' })
         const data = await res.json()
         setStateRuns(prev => prev.map(r =>
           r.state === state ? { ...r, status: res.ok ? 'done' : 'error', cases: data.cases_extracted ?? 0, error: data.error } : r
@@ -116,8 +116,8 @@ export default function LivePage() {
           r.state === state ? { ...r, status: 'error', error: String(e) } : r
         ))
       }
-      // Small delay between states to respect rate limits
-      if (i < ALL_STATES.length - 1) await new Promise(r => setTimeout(r, 1500))
+      // Delay between states to respect Gemini free tier rate limits
+      if (i < ALL_STATES.length - 1) await new Promise(r => setTimeout(r, 3000))
     }
 
     setAgentRunning(false)

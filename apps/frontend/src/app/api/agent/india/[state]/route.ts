@@ -83,13 +83,15 @@ export async function GET(
       completed_at: new Date().toISOString(),
     }).eq('id', stateRunId)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       state,
       run_id: stateRunId,
       sources_fetched: articles.length,
       cases_extracted: rows.length,
       cases: rows,
     })
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+    return response
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     await db.from('agent_runs').update({
@@ -98,6 +100,8 @@ export async function GET(
       completed_at: new Date().toISOString(),
     }).eq('id', stateRunId)
 
-    return NextResponse.json({ error: msg, state }, { status: 500 })
+    const errResponse = NextResponse.json({ error: msg, state }, { status: 500 })
+    errResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+    return errResponse
   }
 }
