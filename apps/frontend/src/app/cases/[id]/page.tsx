@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getCaseDetail } from '@/lib/mock-data'
-import type { CaseEvent, TimelineGap } from '@/lib/api'
+import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
+import type { CaseEvent, TimelineGap, CaseDetail } from '@/lib/api'
 import { StageProgressBar } from '@/components/StageProgressBar'
 import { GapAlert } from '@/components/GapAlert'
 import { SourceBadge } from '@/components/SourceBadge'
@@ -44,8 +45,45 @@ interface PageProps {
   params: { id: string }
 }
 
-export function generateMetadata({ params }: PageProps): Metadata {
-  const c = getCaseDetail(params.id)
+async function getLiveCase(id: string): Promise<CaseDetail | null> {
+  if (!isSupabaseConfigured()) return null
+  try {
+    const db = getServiceClient()
+    const { data } = await db
+      .from('live_cases')
+      .select('*')
+      .eq('id', id)
+      .single()
+    if (!data) return null
+    return {
+      id: data.id,
+      case_ref: data.case_ref,
+      victim_pseudonym: data.headline ?? data.case_ref,
+      crime_category: data.crime_category,
+      status: data.status,
+      incident_date: data.incident_date ?? null,
+      incident_date_approx: false,
+      state: data.state,
+      district: data.district,
+      ipc_sections: data.ipc_sections ?? [],
+      pocso_applicable: data.pocso_applicable ?? false,
+      fast_track_court: data.fast_track_court ?? false,
+      num_victims: data.num_victims ?? null,
+      event_count: 0,
+      last_event_at: data.created_at ?? null,
+      overall_confidence: data.overall_confidence ?? null,
+      conviction_achieved: data.conviction_achieved ?? false,
+      created_at: data.created_at ?? new Date().toISOString(),
+      updated_at: data.updated_at ?? data.created_at ?? new Date().toISOString(),
+      events: [],
+    } as CaseDetail
+  } catch {
+    return null
+  }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const c = getCaseDetail(params.id) ?? await getLiveCase(params.id)
   if (!c) return { title: 'Case Detail' }
   return {
     title: `${c.case_ref} — ${CATEGORY_LABELS[c.crime_category] ?? c.crime_category}`,
@@ -53,8 +91,8 @@ export function generateMetadata({ params }: PageProps): Metadata {
   }
 }
 
-export default function CaseDetailPage({ params }: PageProps) {
-  const raw = getCaseDetail(params.id)
+export default async function CaseDetailPage({ params }: PageProps) {
+  const raw = getCaseDetail(params.id) ?? await getLiveCase(params.id)
   if (!raw) notFound()
   const c = raw as NonNullable<typeof raw>
 

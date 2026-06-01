@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { CASES } from '@/lib/mock-data'
 import { fuzzyMatch } from '@/lib/fuzzy'
-import type { CaseSummary } from '@/lib/api'
+import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
+
+export const dynamic = 'force-dynamic'
+
+const PAGE_SIZE = 20
 
 const STATES = [
   'Andhra Pradesh', 'Bihar', 'Delhi', 'Karnataka', 'Madhya Pradesh',
@@ -27,16 +31,97 @@ const STATUS_LABELS: Record<string, string> = {
   CLOSED_ACQUITTED: 'Acquitted',
 }
 
+// Unified display type for both mock and live cases
+interface DisplayCase {
+  id: string
+  case_ref: string
+  headline: string | null
+  crime_category: string
+  status: string
+  incident_date: string | null
+  state: string
+  district: string
+  ipc_sections: number[]
+  pocso_applicable: boolean
+  fast_track_court: boolean
+  num_victims: number | null
+  conviction_achieved: boolean
+  overall_confidence: number | null
+  last_event_at: string | null
+  event_count: number
+  is_live: boolean
+}
+
 interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-function queryCases(params: {
+async function fetchLiveCases(q?: string): Promise<DisplayCase[]> {
+  if (!isSupabaseConfigured()) return []
+  try {
+    const db = getServiceClient()
+    let query = db
+      .from('live_cases')
+      .select('id,case_ref,headline,crime_category,status,incident_date,state,district,ipc_sections,pocso_applicable,fast_track_court,num_victims,conviction_achieved,overall_confidence,created_at')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (q) {
+      query = query.or(
+        `headline.ilike.%${q}%,state.ilike.%${q}%,district.ilike.%${q}%,case_ref.ilike.%${q}%`
+      )
+    }
+
+    const { data, error } = await query
+    if (error || !data) return []
+
+    return data.map((r) => ({
+      id: r.id,
+      case_ref: r.case_ref,
+      headline: r.headline ?? null,
+      crime_category: r.crime_category,
+      status: r.status,
+      incident_date: r.incident_date ?? null,
+      state: r.state,
+      district: r.district,
+      ipc_sections: r.ipc_sections ?? [],
+      pocso_applicable: r.pocso_applicable ?? false,
+      fast_track_court: r.fast_track_court ?? false,
+      num_victims: r.num_victims ?? null,
+      conviction_achieved: r.conviction_achieved ?? false,
+      overall_confidence: r.overall_confidence ?? null,
+      last_event_at: r.created_at ?? null,
+      event_count: 0,
+      is_live: true,
+    }))
+  } catch {
+    return []
+  }
+}
+
+function queryMockCases(params: {
   page: number; q?: string; state?: string; crime_category?: string;
   status?: string; pocso?: boolean; fast_track?: boolean; conviction?: boolean;
-}) {
-  const PAGE_SIZE = 20
-  let items: CaseSummary[] = [...CASES]
+}): DisplayCase[] {
+  let items = CASES.map((c) => ({
+    id: c.id,
+    case_ref: c.case_ref,
+    headline: null,
+    crime_category: c.crime_category,
+    status: c.status,
+    incident_date: c.incident_date ?? null,
+    state: c.state,
+    district: c.district,
+    ipc_sections: c.ipc_sections,
+    pocso_applicable: c.pocso_applicable,
+    fast_track_court: c.fast_track_court,
+    num_victims: c.num_victims ?? null,
+    conviction_achieved: c.conviction_achieved,
+    overall_confidence: c.overall_confidence ?? null,
+    last_event_at: c.last_event_at ?? null,
+    event_count: c.event_count,
+    is_live: false,
+  } as DisplayCase))
 
   if (params.state) items = items.filter(c => fuzzyMatch(params.state!, c.state))
   if (params.crime_category) items = items.filter(c => c.crime_category === params.crime_category)
@@ -52,14 +137,18 @@ function queryCases(params: {
       c.case_ref.toLowerCase().includes(params.q!.toLowerCase())
     )
   }
-
-  const total = items.length
-  const start = (params.page - 1) * PAGE_SIZE
-  return { items: items.slice(start, start + PAGE_SIZE), total, page: params.page, page_size: PAGE_SIZE }
+  return items
 }
 
-export default function CasesPage({ searchParams }: PageProps) {
-  const page = parseInt(String(searchParams.page ?? '1'), 10)
+function pageUrl(page: number, params: Record<string, string | undefined>) {
+  const sp = new URLSearchParams()
+  sp.set('page', String(page))
+  Object.entries(params).forEach(([k, v]) => { if (v) sp.set(k, v) })
+  return `/cases?${sp.toString()}`
+}
+
+export default async function CasesPage({ searchParams }: PageProps) {
+  const page = Math.max(1, parseInt(String(searchParams.page ?? '1'), 10))
   const q = searchParams.q as string | undefined
   const state = searchParams.state as string | undefined
   const crime_category = searchParams.crime_category as string | undefined
@@ -67,22 +156,40 @@ export default function CasesPage({ searchParams }: PageProps) {
   const pocso = searchParams.pocso === 'true' ? true : undefined
   const fast_track = searchParams.fast_track === 'true' ? true : undefined
   const conviction = searchParams.conviction === 'true' ? true : undefined
-
-  const result = queryCases({ page, q, state, crime_category, status, pocso, fast_track, conviction })
-  const totalPages = Math.ceil(result.total / result.page_size)
   const hasFilters = !!(q || state || crime_category || status || pocso || fast_track || conviction)
 
-  function pageUrl(p: number) {
-    const sp = new URLSearchParams()
-    sp.set('page', String(p))
-    if (q) sp.set('q', q)
-    if (state) sp.set('state', state)
-    if (crime_category) sp.set('crime_category', crime_category)
-    if (status) sp.set('status', status)
-    if (pocso) sp.set('pocso', 'true')
-    if (fast_track) sp.set('fast_track', 'true')
-    if (conviction) sp.set('conviction', 'true')
-    return `/cases?${sp.toString()}`
+  // Fetch live cases (Supabase) and mock cases in parallel
+  const [liveCases, mockCases] = await Promise.all([
+    fetchLiveCases(q),
+    Promise.resolve(queryMockCases({ page: 1, q, state, crime_category, status, pocso, fast_track, conviction })),
+  ])
+
+  // Apply non-q filters to live cases
+  let filteredLive = liveCases
+  if (state) filteredLive = filteredLive.filter(c => fuzzyMatch(state, c.state))
+  if (crime_category) filteredLive = filteredLive.filter(c => c.crime_category === crime_category)
+  if (status) filteredLive = filteredLive.filter(c => c.status === status)
+  if (pocso) filteredLive = filteredLive.filter(c => c.pocso_applicable)
+  if (fast_track) filteredLive = filteredLive.filter(c => c.fast_track_court)
+  if (conviction) filteredLive = filteredLive.filter(c => c.conviction_achieved)
+
+  // Merge: live cases first, then mock — deduplicate by id
+  const seen = new Set<string>()
+  const allCases: DisplayCase[] = []
+  for (const c of [...filteredLive, ...mockCases]) {
+    if (!seen.has(c.id)) { seen.add(c.id); allCases.push(c) }
+  }
+
+  const total = allCases.length
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+  const start = (page - 1) * PAGE_SIZE
+  const items = allCases.slice(start, start + PAGE_SIZE)
+
+  const filterParams = {
+    q, state, crime_category, status,
+    pocso: pocso ? 'true' : undefined,
+    fast_track: fast_track ? 'true' : undefined,
+    conviction: conviction ? 'true' : undefined,
   }
 
   return (
@@ -94,7 +201,7 @@ export default function CasesPage({ searchParams }: PageProps) {
             type="text"
             name="q"
             defaultValue={q}
-            placeholder="Search by state, district, case ref…"
+            placeholder="Search by name, state, district, case ref…"
             className="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nyaya-navy"
           />
           {CASES.length > 0 && (
@@ -133,17 +240,22 @@ export default function CasesPage({ searchParams }: PageProps) {
 
       {/* Result count */}
       <p className="text-sm text-gray-600 mb-4">
-        {result.total.toLocaleString('en-IN')} cases found
+        {total.toLocaleString('en-IN')} case{total !== 1 ? 's' : ''} found
+        {filteredLive.length > 0 && (
+          <span className="ml-2 text-emerald-600 font-medium">
+            · {filteredLive.length} live
+          </span>
+        )}
       </p>
 
       {/* Cases list */}
-      {result.items.length === 0 ? (
+      {items.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           No cases found{hasFilters ? ' matching your filters.' : '.'}
         </div>
       ) : (
         <ul className="space-y-3" aria-label="Case list">
-          {result.items.map((c) => (
+          {items.map((c) => (
             <li key={c.id}>
               <Link
                 href={`/cases/${c.id}`}
@@ -152,6 +264,11 @@ export default function CasesPage({ searchParams }: PageProps) {
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-xs text-gray-400">{c.case_ref}</span>
+                    {c.is_live && (
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700 font-semibold">
+                        LIVE
+                      </span>
+                    )}
                     <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-medium">
                       {CATEGORY_LABELS[c.crime_category] ?? c.crime_category}
                     </span>
@@ -169,12 +286,18 @@ export default function CasesPage({ searchParams }: PageProps) {
                     {STATUS_LABELS[c.status] ?? c.status.replace(/_/g, ' ')}
                   </span>
                 </div>
+
+                {/* Headline for live cases */}
+                {c.headline && (
+                  <p className="mt-2 text-sm text-gray-800 line-clamp-2">{c.headline}</p>
+                )}
+
                 <div className="mt-2 text-sm text-gray-600">
                   {c.district}, {c.state}
                   {c.incident_date && <span className="ml-2 text-gray-400">— {c.incident_date.substring(0, 4)}</span>}
                 </div>
                 <div className="mt-1 flex items-center gap-4 text-xs text-gray-400">
-                  <span>{c.event_count} events</span>
+                  {c.event_count > 0 && <span>{c.event_count} events</span>}
                   {c.last_event_at && (
                     <span>Updated {new Date(c.last_event_at).toLocaleDateString('en-IN')}</span>
                   )}
@@ -189,12 +312,12 @@ export default function CasesPage({ searchParams }: PageProps) {
       {totalPages > 1 && (
         <nav className="flex justify-center gap-2 mt-8" aria-label="Pagination">
           {page > 1 && (
-            <Link href={pageUrl(page - 1)}
+            <Link href={pageUrl(page - 1, filterParams)}
               className="px-3 py-1 border rounded text-sm hover:bg-gray-50">← Prev</Link>
           )}
           <span className="px-3 py-1 text-sm text-gray-500">Page {page} of {totalPages}</span>
           {page < totalPages && (
-            <Link href={pageUrl(page + 1)}
+            <Link href={pageUrl(page + 1, filterParams)}
               className="px-3 py-1 border rounded text-sm hover:bg-gray-50">Next →</Link>
           )}
         </nav>
