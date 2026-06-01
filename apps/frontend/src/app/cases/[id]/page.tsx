@@ -56,7 +56,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 export default function CaseDetailPage({ params }: PageProps) {
   const raw = getCaseDetail(params.id)
   if (!raw) notFound()
-  const c = raw!
+  const c = raw as NonNullable<typeof raw>
 
   const currentStage = CURRENT_STAGE_MAP[c.status] ?? 'FIR'
   const statusColor = STATUS_COLORS[c.status] ?? 'bg-gray-100 text-gray-700'
