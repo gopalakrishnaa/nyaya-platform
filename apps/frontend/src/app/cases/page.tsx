@@ -72,6 +72,19 @@ export default function CasesPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(result.total / result.page_size)
   const hasFilters = !!(q || state || crime_category || status || pocso || fast_track || conviction)
 
+  function pageUrl(p: number) {
+    const sp = new URLSearchParams()
+    sp.set('page', String(p))
+    if (q) sp.set('q', q)
+    if (state) sp.set('state', state)
+    if (crime_category) sp.set('crime_category', crime_category)
+    if (status) sp.set('status', status)
+    if (pocso) sp.set('pocso', 'true')
+    if (fast_track) sp.set('fast_track', 'true')
+    if (conviction) sp.set('conviction', 'true')
+    return `/cases?${sp.toString()}`
+  }
+
   return (
     <div>
       {/* Search + filter bar */}
@@ -84,7 +97,7 @@ export default function CasesPage({ searchParams }: PageProps) {
             placeholder="Search by state, district, case ref…"
             className="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nyaya-navy"
           />
-          {result.total > 0 && (
+          {CASES.length > 0 && (
             <>
               <select name="state" className="text-sm border rounded-lg px-3 py-2">
                 <option value="">All states</option>
@@ -176,12 +189,12 @@ export default function CasesPage({ searchParams }: PageProps) {
       {totalPages > 1 && (
         <nav className="flex justify-center gap-2 mt-8" aria-label="Pagination">
           {page > 1 && (
-            <Link href={`/cases?page=${page - 1}${q ? `&q=${q}` : ''}${state ? `&state=${state}` : ''}`}
+            <Link href={pageUrl(page - 1)}
               className="px-3 py-1 border rounded text-sm hover:bg-gray-50">← Prev</Link>
           )}
           <span className="px-3 py-1 text-sm text-gray-500">Page {page} of {totalPages}</span>
           {page < totalPages && (
-            <Link href={`/cases?page=${page + 1}${q ? `&q=${q}` : ''}${state ? `&state=${state}` : ''}`}
+            <Link href={pageUrl(page + 1)}
               className="px-3 py-1 border rounded text-sm hover:bg-gray-50">Next →</Link>
           )}
         </nav>
