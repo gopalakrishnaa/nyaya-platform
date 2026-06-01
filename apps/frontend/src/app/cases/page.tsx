@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { CASES } from '@/lib/mock-data'
 import { fuzzyMatch } from '@/lib/fuzzy'
-import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
+import { LIVE_CASE_EVENTS, LIVE_CASES_STATIC } from '@/lib/live-case-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -164,14 +164,52 @@ export default async function CasesPage({ searchParams }: PageProps) {
     Promise.resolve(queryMockCases({ page: 1, q, state, crime_category, status, pocso, fast_track, conviction })),
   ])
 
-  // Apply non-q filters to live cases
-  let filteredLive = liveCases
+  // Build static-registry cases (always present, no Supabase needed)
+  const staticCases: DisplayCase[] = LIVE_CASES_STATIC.map((sc) => ({
+    id: sc.id,
+    case_ref: sc.case_ref,
+    headline: sc.victim_pseudonym,
+    crime_category: sc.crime_category,
+    status: sc.status,
+    incident_date: sc.incident_date,
+    state: sc.state,
+    district: sc.district,
+    ipc_sections: sc.ipc_sections,
+    pocso_applicable: sc.pocso_applicable,
+    fast_track_court: sc.fast_track_court,
+    num_victims: sc.num_victims,
+    conviction_achieved: sc.conviction_achieved,
+    overall_confidence: sc.overall_confidence,
+    last_event_at: sc.last_event_at,
+    event_count: LIVE_CASE_EVENTS[sc.id]?.length ?? sc.event_count,
+    is_live: true,
+  }))
+
+  // Apply non-q filters to live cases (Supabase + static)
+  let filteredLive = [...liveCases, ...staticCases]
+  // Deduplicate live: Supabase record wins over static
+  const seenLive = new Set<string>()
+  filteredLive = filteredLive.filter(c => {
+    if (seenLive.has(c.id)) return false
+    seenLive.add(c.id)
+    return true
+  })
   if (state) filteredLive = filteredLive.filter(c => fuzzyMatch(state, c.state))
   if (crime_category) filteredLive = filteredLive.filter(c => c.crime_category === crime_category)
   if (status) filteredLive = filteredLive.filter(c => c.status === status)
   if (pocso) filteredLive = filteredLive.filter(c => c.pocso_applicable)
   if (fast_track) filteredLive = filteredLive.filter(c => c.fast_track_court)
   if (conviction) filteredLive = filteredLive.filter(c => c.conviction_achieved)
+  if (q) {
+    const ql = q.toLowerCase()
+    filteredLive = filteredLive.filter(c =>
+      fuzzyMatch(q, c.state) ||
+      fuzzyMatch(q, c.district) ||
+      c.crime_category.toLowerCase().includes(ql) ||
+      c.case_ref.toLowerCase().includes(ql) ||
+      (c.headline ?? '').toLowerCase().includes(ql)
+    )
+  }
 
   // Merge: live cases first, then mock — deduplicate by id
   const seen = new Set<string>()
