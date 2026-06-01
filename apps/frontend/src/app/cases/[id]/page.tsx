@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getCaseDetail } from '@/lib/mock-data'
 import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
+import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
 import type { CaseEvent, TimelineGap, CaseDetail } from '@/lib/api'
 import { StageProgressBar } from '@/components/StageProgressBar'
 import { GapAlert } from '@/components/GapAlert'
@@ -41,6 +42,9 @@ const CURRENT_STAGE_MAP: Record<string, string> = {
   CLOSED_ACQUITTED: 'CLOSURE',
 }
 
+// Progress stage order (matches user-requested: FIR→Investigation→Chargesheet→Trial→Judgment→Appeal)
+// StageProgressBar uses this order internally.
+
 interface PageProps {
   params: { id: string }
 }
@@ -75,7 +79,7 @@ async function getLiveCase(id: string): Promise<CaseDetail | null> {
       conviction_achieved: data.conviction_achieved ?? false,
       created_at: data.created_at ?? new Date().toISOString(),
       updated_at: data.updated_at ?? data.created_at ?? new Date().toISOString(),
-      events: [],
+      events: LIVE_CASE_EVENTS[id] ?? [],
     } as CaseDetail
   } catch {
     return null
