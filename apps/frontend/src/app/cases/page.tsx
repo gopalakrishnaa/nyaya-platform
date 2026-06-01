@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { CASES } from '@/lib/mock-data'
 import { fuzzyMatch } from '@/lib/fuzzy'
 import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
+import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,8 +91,10 @@ async function fetchLiveCases(q?: string): Promise<DisplayCase[]> {
       num_victims: r.num_victims ?? null,
       conviction_achieved: r.conviction_achieved ?? false,
       overall_confidence: r.overall_confidence ?? null,
-      last_event_at: r.created_at ?? null,
-      event_count: 0,
+      last_event_at: LIVE_CASE_EVENTS[r.id]?.at(-1)?.event_date
+        ? LIVE_CASE_EVENTS[r.id].at(-1)!.event_date + 'T00:00:00'
+        : r.created_at ?? null,
+      event_count: LIVE_CASE_EVENTS[r.id]?.length ?? 0,
       is_live: true,
     }))
   } catch {
