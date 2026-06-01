@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getCaseDetail } from '@/lib/mock-data'
 import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
-import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
+import { LIVE_CASE_EVENTS, LIVE_CASES_STATIC } from '@/lib/live-case-events'
 import type { CaseEvent, TimelineGap, CaseDetail } from '@/lib/api'
 import { StageProgressBar } from '@/components/StageProgressBar'
 import { GapAlert } from '@/components/GapAlert'
@@ -49,7 +49,17 @@ interface PageProps {
   params: { id: string }
 }
 
+function getStaticCase(id: string): CaseDetail | null {
+  const sc = LIVE_CASES_STATIC.find((c) => c.id === id)
+  if (!sc) return null
+  return { ...sc, events: LIVE_CASE_EVENTS[id] ?? [] }
+}
+
 async function getLiveCase(id: string): Promise<CaseDetail | null> {
+  // Check static registry first — no Supabase needed
+  const staticCase = getStaticCase(id)
+  if (staticCase) return staticCase
+
   if (!isSupabaseConfigured()) return null
   try {
     const db = getServiceClient()

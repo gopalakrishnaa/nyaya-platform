@@ -1,9 +1,12 @@
 /**
- * Timeline events for high-profile real cases tracked by Nyaya.
+ * Timeline events and static metadata for high-profile real cases tracked by Nyaya.
  * Sourced from public reporting; updated manually as cases progress.
  * Keyed by live_cases.id.
+ *
+ * LIVE_CASES_STATIC: cases guaranteed to appear in listings without Supabase.
+ * These are shown with LIVE badge and are always searchable.
  */
-import type { CaseEvent } from './api'
+import type { CaseEvent, CaseDetail } from './api'
 
 const ANI = {
   source_code: 'ANI',
@@ -24,6 +27,36 @@ const HINDU = {
   source_url: '',
 }
 
+// ─── Static case registry ────────────────────────────────────────────────────
+// Cases here are always visible in listings + detail pages, even when Supabase
+// has no record. Seeding Supabase is still preferred for API-level queries.
+
+export const LIVE_CASES_STATIC: CaseDetail[] = [
+  {
+    id: 'live-mp-twisha-sharma-2026',
+    case_ref: 'NYA-LIVE-MP-2026-TWISHA',
+    victim_pseudonym: 'Twisha Sharma',
+    crime_category: 'DOWRY_DEATH',
+    status: 'UNDER_INVESTIGATION',
+    incident_date: '2026-05-12',
+    incident_date_approx: true,
+    state: 'Madhya Pradesh',
+    district: 'Bhopal',
+    ipc_sections: [304, 498],
+    pocso_applicable: false,
+    fast_track_court: false,
+    num_victims: 1,
+    event_count: 8,
+    last_event_at: '2026-06-01T00:00:00',
+    overall_confidence: 0.95,
+    conviction_achieved: false,
+    created_at: '2026-05-12T00:00:00',
+    updated_at: '2026-06-01T00:00:00',
+    events: [], // populated at runtime from LIVE_CASE_EVENTS below
+  },
+]
+
+// ─── Timeline events ──────────────────────────────────────────────────────────
 export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
   'live-mp-twisha-sharma-2026': [
     {
