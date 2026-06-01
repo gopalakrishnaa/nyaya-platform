@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { CASES } from '@/lib/mock-data'
 import { fuzzyMatch } from '@/lib/fuzzy'
-import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
 import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
 
 export const dynamic = 'force-dynamic'
@@ -58,43 +57,41 @@ interface PageProps {
 }
 
 async function fetchLiveCases(q?: string): Promise<DisplayCase[]> {
-  if (!isSupabaseConfigured()) return []
+  // Use the internal API route (confirmed working) rather than direct Supabase
+  // client — getServiceClient() is unreliable from RSC on Vercel.
+  const base = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
+
   try {
-    const db = getServiceClient()
-    let query = db
-      .from('live_cases')
-      .select('id,case_ref,headline,crime_category,status,incident_date,state,district,ipc_sections,pocso_applicable,fast_track_court,num_victims,conviction_achieved,overall_confidence,created_at')
-      .order('created_at', { ascending: false })
-      .limit(100)
+    const params = new URLSearchParams({ page: '1', page_size: '100' })
+    if (q) params.set('q', q)
+    const res = await fetch(`${base}/api/v1/live-cases?${params}`, {
+      cache: 'no-store',
+    })
+    if (!res.ok) return []
+    const json = await res.json()
+    const items: Array<Record<string, unknown>> = json.items ?? []
 
-    if (q) {
-      query = query.or(
-        `headline.ilike.%${q}%,state.ilike.%${q}%,district.ilike.%${q}%,case_ref.ilike.%${q}%`
-      )
-    }
-
-    const { data, error } = await query
-    if (error || !data) return []
-
-    return data.map((r) => ({
-      id: r.id,
-      case_ref: r.case_ref,
-      headline: r.headline ?? null,
-      crime_category: r.crime_category,
-      status: r.status,
-      incident_date: r.incident_date ?? null,
-      state: r.state,
-      district: r.district,
-      ipc_sections: r.ipc_sections ?? [],
-      pocso_applicable: r.pocso_applicable ?? false,
-      fast_track_court: r.fast_track_court ?? false,
-      num_victims: r.num_victims ?? null,
-      conviction_achieved: r.conviction_achieved ?? false,
-      overall_confidence: r.overall_confidence ?? null,
-      last_event_at: LIVE_CASE_EVENTS[r.id]?.at(-1)?.event_date
-        ? LIVE_CASE_EVENTS[r.id].at(-1)!.event_date + 'T00:00:00'
-        : r.created_at ?? null,
-      event_count: LIVE_CASE_EVENTS[r.id]?.length ?? 0,
+    return items.map((r) => ({
+      id: r.id as string,
+      case_ref: r.case_ref as string,
+      headline: (r.headline as string | null) ?? null,
+      crime_category: r.crime_category as string,
+      status: r.status as string,
+      incident_date: (r.incident_date as string | null) ?? null,
+      state: r.state as string,
+      district: r.district as string,
+      ipc_sections: (r.ipc_sections as number[]) ?? [],
+      pocso_applicable: (r.pocso_applicable as boolean) ?? false,
+      fast_track_court: (r.fast_track_court as boolean) ?? false,
+      num_victims: (r.num_victims as number | null) ?? null,
+      conviction_achieved: (r.conviction_achieved as boolean) ?? false,
+      overall_confidence: (r.overall_confidence as number | null) ?? null,
+      last_event_at: LIVE_CASE_EVENTS[r.id as string]?.at(-1)?.event_date
+        ? LIVE_CASE_EVENTS[r.id as string].at(-1)!.event_date + 'T00:00:00'
+        : (r.created_at as string | null) ?? null,
+      event_count: LIVE_CASE_EVENTS[r.id as string]?.length ?? 0,
       is_live: true,
     }))
   } catch {
