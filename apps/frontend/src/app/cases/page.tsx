@@ -149,10 +149,12 @@ function pageUrl(page: number, params: Record<string, string | undefined>) {
 
 export default async function CasesPage({ searchParams }: PageProps) {
   const page = Math.max(1, parseInt(String(searchParams.page ?? '1'), 10))
-  const q = searchParams.q as string | undefined
-  const state = searchParams.state as string | undefined
-  const crime_category = searchParams.crime_category as string | undefined
-  const status = searchParams.status as string | undefined
+  // Safely extract first value when params are repeated (?q=a&q=b → "a")
+  const sp = (k: string) => { const v = searchParams[k]; return Array.isArray(v) ? v[0] : v }
+  const q = sp('q') as string | undefined
+  const state = sp('state') as string | undefined
+  const crime_category = sp('crime_category') as string | undefined
+  const status = sp('status') as string | undefined
   const pocso = searchParams.pocso === 'true' ? true : undefined
   const fast_track = searchParams.fast_track === 'true' ? true : undefined
   const conviction = searchParams.conviction === 'true' ? true : undefined

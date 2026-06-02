@@ -53,8 +53,10 @@ export async function GET(req: NextRequest) {
         .lte('incident_date', `${year}-12-31`)
     }
     if (q) {
+      // Strip PostgREST special chars to prevent filter injection via .or() string interpolation.
+      const safeQ = q.replace(/[(),\\'"]/g, '')
       query = query.or(
-        `state.ilike.%${q}%,district.ilike.%${q}%,headline.ilike.%${q}%,case_ref.ilike.%${q}%`
+        `state.ilike.%${safeQ}%,district.ilike.%${safeQ}%,headline.ilike.%${safeQ}%,case_ref.ilike.%${safeQ}%`
       )
     }
 

@@ -30,11 +30,19 @@ const REAL_CASES = [
     source_title: 'Times of India',
     overall_confidence: 0.92,
     agent_run_id: 'manual-seed-v1',
-    created_at: new Date().toISOString(),
+    created_at: '2026-05-12T00:00:00.000Z',
   },
 ]
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Require secret header to prevent unauthenticated DB writes.
+  // Set ADMIN_SECRET in Vercel env vars (Settings → Environment Variables).
+  const secret = process.env.ADMIN_SECRET
+  const provided = req.headers.get('x-admin-secret') ?? new URL(req.url).searchParams.get('secret')
+  if (!secret || provided !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 })
   }
