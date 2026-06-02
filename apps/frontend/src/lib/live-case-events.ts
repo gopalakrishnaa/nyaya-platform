@@ -35,7 +35,7 @@ export const LIVE_CASES_STATIC: CaseDetail[] = [
   {
     id: 'live-mp-twisha-sharma-2026',
     case_ref: 'NYA-LIVE-MP-2026-TWISHA',
-    victim_pseudonym: 'Twisha Sharma',
+    victim_pseudonym: 'VICTIM-TWISHA-MP26', // real name is in headline field; pseudonym field must not hold PII
     crime_category: 'DOWRY_DEATH',
     status: 'UNDER_INVESTIGATION',
     incident_date: '2026-05-12',
