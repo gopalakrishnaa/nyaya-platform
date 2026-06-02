@@ -82,7 +82,7 @@ export function ChecklistModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-nyaya-navy"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-prajna-navy"
               />
             </div>
           )}
@@ -103,7 +103,7 @@ export function ChecklistModal({
           <button
             onClick={handleConfirm}
             disabled={!allRequired || loading}
-            className="px-4 py-2 text-sm bg-nyaya-navy text-white rounded font-medium hover:bg-nyaya-navy/90 disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-prajna-navy text-white rounded font-medium hover:bg-prajna-navy/90 disabled:opacity-50"
           >
             {loading ? 'Processing…' : confirmLabel}
           </button>

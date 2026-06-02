@@ -1,5 +1,5 @@
 /**
- * Nyaya AI Extraction Pipeline — Guidelines §4.2
+ * Prajna AI Extraction Pipeline — Guidelines §4.2
  *
  * Ingest → Extract → Store
  * Google News RSS  →  Google Gemini Flash  →  Supabase live_cases
@@ -41,7 +41,7 @@ export async function fetchStateNews(state: string): Promise<NewsItem[]> {
 
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'NyayaBot/1.0 (+https://nyayaplatform.vercel.app)' },
+        headers: { 'User-Agent': 'PrajnaBot/1.0 (+https://nyayaplatform.vercel.app)' },
         signal: AbortSignal.timeout(8_000),
       })
       const xml = await res.text()
@@ -131,9 +131,9 @@ export async function extractCases(state: string, articles: NewsItem[]): Promise
   const { object } = await generateObject({
     model: google('gemini-flash-latest'),
     schema: ExtractedCaseSchema,
-    system: `You are a legal data extraction agent for the Nyaya platform — tracking crimes against women in India.
+    system: `You are a legal data extraction agent for the Prajna platform — tracking crimes against women in India.
 
-Nyaya Guidelines §4.2 — Extraction rules:
+Prajna Guidelines §4.2 — Extraction rules:
 - Extract ONLY facts explicitly stated in the article. Never infer or guess.
 - Protect victim privacy: never include real names. Use district-level location only.
 - IPC sections: include ONLY when explicitly named (376=rape, 354=assault, 498A=domestic violence, 302=murder, 304B=dowry death, 366=abduction, 363=kidnapping, POCSO Act)
@@ -182,7 +182,7 @@ export function buildLiveCase(state: string, c: ExtractedCase, runId: string, id
     ...c,
     incident_date: sanitizeDate(c.incident_date),
     id: `live-${state.slice(0, 3).toLowerCase()}-${ts}-${idx}`,
-    case_ref: `NYA-LIVE-${state.slice(0, 2).toUpperCase()}-${new Date().getFullYear()}-${String(idx + 1).padStart(4, '0')}`,
+    case_ref: `PRJ-LIVE-${state.slice(0, 2).toUpperCase()}-${new Date().getFullYear()}-${String(idx + 1).padStart(4, '0')}`,
     state,
     overall_confidence: 0.85,
     agent_run_id: runId,

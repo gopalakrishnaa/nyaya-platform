@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-nyaya-navy mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-prajna-navy mb-6">Dashboard</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -53,7 +53,7 @@ function StatCard({
         urgent ? 'border-red-400' : 'border-gray-200'
       }`}
     >
-      <div className={`text-3xl font-bold ${urgent ? 'text-red-600' : 'text-nyaya-navy'}`}>
+      <div className={`text-3xl font-bold ${urgent ? 'text-red-600' : 'text-prajna-navy'}`}>
         {value}
       </div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
@@ -65,9 +65,9 @@ function QuickLink({ href, label, desc }: { href: string; label: string; desc: s
   return (
     <a
       href={href}
-      className="block bg-white border border-gray-200 rounded-lg p-5 hover:border-nyaya-navy hover:shadow-sm transition-all"
+      className="block bg-white border border-gray-200 rounded-lg p-5 hover:border-prajna-navy hover:shadow-sm transition-all"
     >
-      <h2 className="font-semibold text-nyaya-navy">{label}</h2>
+      <h2 className="font-semibold text-prajna-navy">{label}</h2>
       <p className="text-sm text-gray-500 mt-1">{desc}</p>
     </a>
   )

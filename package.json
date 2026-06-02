@@ -1,11 +1,11 @@
 {
-  "name": "nyaya-platform",
+  "name": "prajna-platform",
   "version": "0.1.0",
   "private": true,
   "workspaces": ["apps/*", "packages/*", "services/*"],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build --filter=@nyaya/frontend",
+    "build": "turbo run build --filter=@prajna/frontend",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check"

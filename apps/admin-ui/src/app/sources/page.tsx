@@ -19,7 +19,7 @@ export default async function SourcesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-nyaya-navy">Sources</h1>
+        <h1 className="text-2xl font-bold text-prajna-navy">Sources</h1>
       </div>
       <SourcesManager sources={sources} token={token} />
     </div>

@@ -1,11 +1,11 @@
-# Nyaya न्याय — Justice Transparency Platform
+# Prajna न्याय — Justice Transparency Platform
 
 > Tracking crimes against women through India's legal system — from FIR to conviction.
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
-[![CI](https://github.com/nyaya-platform/nyaya-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/nyaya-platform/nyaya-platform/actions)
+[![CI](https://github.com/prajna-platform/prajna-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/prajna-platform/prajna-platform/actions)
 
-Nyaya (Sanskrit: न्याय, "justice") is an open-source nonprofit platform that aggregates publicly available information about crimes against women in India, normalises it into structured legal timelines, and surfaces systemic delays so journalists, researchers, and civil society organisations can act on them.
+Prajna (Sanskrit: न्याय, "justice") is an open-source nonprofit platform that aggregates publicly available information about crimes against women in India, normalises it into structured legal timelines, and surfaces systemic delays so journalists, researchers, and civil society organisations can act on them.
 
 **Every case is documented. Every delay is visible. No victim is named.**
 
@@ -42,8 +42,8 @@ See [docs/01-architecture-overview.md](docs/01-architecture-overview.md) for ful
 ## Quick Start
 
 ```bash
-git clone https://github.com/nyaya-platform/nyaya-platform
-cd nyaya-platform
+git clone https://github.com/prajna-platform/prajna-platform
+cd prajna-platform
 
 # Install dependencies (requires pnpm 9, Python 3.11+)
 pnpm install
@@ -66,7 +66,7 @@ docker compose -f docker/docker-compose.yml exec api alembic upgrade head
 ## Repository Structure
 
 ```
-nyaya-platform/
+prajna-platform/
 ├── apps/
 │   ├── frontend/          # Next.js 14 public frontend
 │   └── admin-ui/          # Next.js 14 admin interface
@@ -151,4 +151,4 @@ AGPL was chosen deliberately: any deployment of this platform (including modifie
 
 ---
 
-*Nyaya is a nonprofit project. It is not affiliated with any government body, law enforcement agency, or political organisation.*
+*Prajna is a nonprofit project. It is not affiliated with any government body, law enforcement agency, or political organisation.*

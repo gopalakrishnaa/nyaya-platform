@@ -42,8 +42,19 @@ const CURRENT_STAGE_MAP: Record<string, string> = {
   CLOSED_ACQUITTED: 'CLOSURE',
 }
 
-// Progress stage order (matches user-requested: FIR→Investigation→Chargesheet→Trial→Judgment→Appeal)
-// StageProgressBar uses this order internally.
+// Maps event_type → stage key for anchor linking
+const EVENT_TYPE_STAGE: Record<string, string> = {
+  FIR_REGISTERED: 'FIR',
+  ARREST_MADE: 'INVESTIGATION',
+  MEDICAL_EXAMINATION: 'INVESTIGATION',
+  FAST_TRACK_COURT_ASSIGNED: 'INVESTIGATION',
+  CHARGESHEET_FILED: 'CHARGESHEET',
+  BAIL_DENIED: 'TRIAL',
+  TRIAL_COMMENCED: 'TRIAL',
+  WITNESS_EXAMINED: 'TRIAL',
+  JUDGMENT_DELIVERED: 'JUDGMENT',
+  CONVICTION: 'CLOSURE',
+}
 
 interface PageProps {
   params: { id: string }
@@ -122,6 +133,13 @@ export default async function CaseDetailPage({ params }: PageProps) {
 
   const milestones = sortedEvents.filter((e) => e.is_milestone)
 
+  // Compute which stages have events (for anchor links in progress bar)
+  const linkedStages = new Set(
+    sortedEvents.map((e) => EVENT_TYPE_STAGE[e.event_type]).filter(Boolean)
+  )
+  // Track first event per stage to add anchor id
+  const stagedAnchorSet = new Set<string>()
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -188,7 +206,7 @@ export default async function CaseDetailPage({ params }: PageProps) {
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
           Progress
         </h2>
-        <StageProgressBar currentStage={currentStage} status={c.status} />
+        <StageProgressBar currentStage={currentStage} status={c.status} linkedStages={linkedStages} />
       </section>
 
       {/* Gaps / delays */}
@@ -215,23 +233,27 @@ export default async function CaseDetailPage({ params }: PageProps) {
           <p className="text-gray-400 text-center py-12">No events recorded yet.</p>
         ) : (
           <ol className="relative border-l border-gray-200 ml-3 space-y-6">
-            {sortedEvents.map((ev) => (
-              <EventItem key={ev.id} event={ev} />
-            ))}
+            {sortedEvents.map((ev) => {
+              const stageKey = EVENT_TYPE_STAGE[ev.event_type]
+              const anchorId = stageKey && !stagedAnchorSet.has(stageKey)
+                ? (stagedAnchorSet.add(stageKey), `stage-${stageKey}`)
+                : undefined
+              return <EventItem key={ev.id} event={ev} anchorId={anchorId} />
+            })}
           </ol>
         )}
       </section>
 
       {/* Milestones summary */}
       {milestones.length > 0 && (
-        <section className="mt-8 bg-nyaya-navy/5 border border-nyaya-navy/20 rounded-lg p-5" aria-label="Key milestones">
-          <h2 className="text-sm font-semibold text-nyaya-navy uppercase tracking-wide mb-3">
+        <section className="mt-8 bg-prajna-navy/5 border border-prajna-navy/20 rounded-lg p-5" aria-label="Key milestones">
+          <h2 className="text-sm font-semibold text-prajna-navy uppercase tracking-wide mb-3">
             Key Milestones
           </h2>
           <ul className="space-y-1">
             {milestones.map((m) => (
               <li key={m.id} className="flex items-center gap-3 text-sm">
-                <span className="text-nyaya-navy font-bold">◆</span>
+                <span className="text-prajna-navy font-bold">◆</span>
                 <span className="text-gray-600">
                   {m.event_date ? m.event_date.substring(0, 10) : 'Date unknown'}
                 </span>
@@ -261,13 +283,13 @@ const EVENT_CATEGORY_COLORS: Record<string, string> = {
   OUTCOME: 'border-green-500',
 }
 
-function EventItem({ event: ev }: { event: CaseEvent }) {
+function EventItem({ event: ev, anchorId }: { event: CaseEvent; anchorId?: string }) {
   const borderColor = EVENT_CATEGORY_COLORS[ev.event_category] ?? 'border-gray-300'
   return (
-    <li className="ml-6">
+    <li id={anchorId} className="ml-6 scroll-mt-20">
       <span
         className={`absolute -left-1.5 w-3 h-3 rounded-full border-2 ${
-          ev.is_milestone ? 'bg-nyaya-navy border-nyaya-navy' : 'bg-white border-gray-400'
+          ev.is_milestone ? 'bg-prajna-navy border-prajna-navy' : 'bg-white border-gray-400'
         }`}
         aria-hidden="true"
       />
@@ -281,7 +303,7 @@ function EventItem({ event: ev }: { event: CaseEvent }) {
             {ev.event_type.replace(/_/g, ' ')}
           </span>
           {ev.is_milestone && (
-            <span className="px-1.5 py-0.5 rounded text-xs bg-nyaya-navy text-white font-medium">
+            <span className="px-1.5 py-0.5 rounded text-xs bg-prajna-navy text-white font-medium">
               Milestone
             </span>
           )}

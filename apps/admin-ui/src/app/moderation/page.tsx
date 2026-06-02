@@ -26,7 +26,7 @@ export default async function ModerationPage({ searchParams }: PageProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-nyaya-navy">Moderation Queue</h1>
+        <h1 className="text-2xl font-bold text-prajna-navy">Moderation Queue</h1>
         <div className="flex gap-2">
           {['PENDING', 'APPROVED', 'REJECTED'].map((s) => (
             <a
@@ -34,8 +34,8 @@ export default async function ModerationPage({ searchParams }: PageProps) {
               href={`/moderation?status=${s}`}
               className={`px-3 py-1 rounded text-sm font-medium border transition-colors ${
                 status === s
-                  ? 'bg-nyaya-navy text-white border-nyaya-navy'
-                  : 'border-gray-300 text-gray-600 hover:border-nyaya-navy'
+                  ? 'bg-prajna-navy text-white border-prajna-navy'
+                  : 'border-gray-300 text-gray-600 hover:border-prajna-navy'
               }`}
             >
               {s.charAt(0) + s.slice(1).toLowerCase()}

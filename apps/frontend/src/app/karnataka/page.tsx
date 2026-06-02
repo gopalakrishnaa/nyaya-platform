@@ -91,19 +91,19 @@ export default function KarnatakaAgentPage() {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <span className="text-2xl">🤖</span>
-          <h1 className="text-2xl font-bold text-nyaya-navy">Karnataka Live Cases</h1>
+          <h1 className="text-2xl font-bold text-prajna-navy">Karnataka Live Cases</h1>
           <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full uppercase tracking-wide">
             AI Agent
           </span>
         </div>
         <p className="text-gray-600 text-sm max-w-2xl">
           Real-time extraction of reported Karnataka cases from news sources.
-          Follows Nyaya Guidelines §4.2 — AI Extraction Pipeline (Google News RSS → Claude → structured data).
+          Follows Prajna Guidelines §4.2 — AI Extraction Pipeline (Google News RSS → Claude → structured data).
         </p>
       </div>
 
       {/* Pipeline diagram */}
-      <div className="bg-nyaya-navy text-white rounded-lg px-6 py-4 mb-6 text-sm">
+      <div className="bg-prajna-navy text-white rounded-lg px-6 py-4 mb-6 text-sm">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono bg-white/10 px-2 py-1 rounded">📡 Google News RSS</span>
           <span className="text-white/50">→</span>
@@ -120,7 +120,7 @@ export default function KarnatakaAgentPage() {
 
       {state.status === 'loading' && (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-12 h-12 border-4 border-nyaya-navy border-t-transparent rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-prajna-navy border-t-transparent rounded-full animate-spin" />
           <div className="text-gray-600 text-sm text-center">
             <p className="font-medium">Agent running…</p>
             <p className="text-gray-400 mt-1">Fetching Karnataka news → extracting cases with Claude</p>
@@ -164,7 +164,7 @@ export default function KarnatakaAgentPage() {
           {/* Meta bar */}
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="text-sm text-gray-500">
-              <span className="font-medium text-nyaya-navy">{state.meta.cases_extracted} cases</span>
+              <span className="font-medium text-prajna-navy">{state.meta.cases_extracted} cases</span>
               {' '}extracted from{' '}
               <span className="font-medium">{state.meta.sources_fetched} articles</span>
               {' '}·{' '}
@@ -172,7 +172,7 @@ export default function KarnatakaAgentPage() {
             </div>
             <button
               onClick={runAgent}
-              className="px-3 py-1.5 border border-nyaya-navy text-nyaya-navy text-xs rounded hover:bg-nyaya-navy hover:text-white transition-colors"
+              className="px-3 py-1.5 border border-prajna-navy text-prajna-navy text-xs rounded hover:bg-prajna-navy hover:text-white transition-colors"
             >
               ↻ Re-run agent
             </button>
@@ -183,14 +183,14 @@ export default function KarnatakaAgentPage() {
             <div className="text-center py-16 text-gray-500">
               <p>No Karnataka cases extracted from current news.</p>
               <p className="text-sm mt-1 text-gray-400">This may mean no recent news matched the criteria, or articles lacked sufficient case details.</p>
-              <button onClick={runAgent} className="mt-4 px-4 py-2 bg-nyaya-navy text-white text-sm rounded">
+              <button onClick={runAgent} className="mt-4 px-4 py-2 bg-prajna-navy text-white text-sm rounded">
                 Re-run agent
               </button>
             </div>
           ) : (
             <ul className="space-y-3">
               {state.cases.map((c) => (
-                <li key={c.id} className="border border-gray-200 rounded-lg p-5 bg-white hover:border-nyaya-navy transition-colors">
+                <li key={c.id} className="border border-gray-200 rounded-lg p-5 bg-white hover:border-prajna-navy transition-colors">
                   <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-medium">
@@ -239,7 +239,7 @@ export default function KarnatakaAgentPage() {
                       href={c.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-nyaya-navy underline hover:no-underline"
+                      className="text-prajna-navy underline hover:no-underline"
                       onClick={(e) => e.stopPropagation()}
                     >
                       View article ↗

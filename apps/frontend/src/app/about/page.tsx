@@ -4,13 +4,13 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'About & Methodology',
   description:
-    'How Nyaya tracks crimes against women through India\'s legal system — sources, methodology, and privacy protections.',
+    'How Prajna tracks crimes against women through India\'s legal system — sources, methodology, and privacy protections.',
 }
 
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto prose prose-gray">
-      <h1 className="text-3xl font-bold text-nyaya-navy mb-2">About Nyaya न्याय</h1>
+      <h1 className="text-3xl font-bold text-prajna-navy mb-2">About Prajna न्याय</h1>
       <p className="text-gray-600 text-lg mb-8">
         Open-source justice transparency platform tracking crimes against women from FIR to
         conviction across India.
@@ -18,7 +18,7 @@ export default function AboutPage() {
 
       <Section title="Mission">
         <p>
-          Nyaya (Sanskrit: न्याय, &ldquo;justice&rdquo;) exists to make the Indian justice system
+          Prajna (Sanskrit: न्याय, &ldquo;justice&rdquo;) exists to make the Indian justice system
           legible and accountable. We aggregate publicly available information about cases of
           violence against women, normalise it into a structured timeline, and surface systemic
           delays so journalists, researchers, and civil society organisations can act on them.
@@ -116,7 +116,7 @@ export default function AboutPage() {
       </Section>
 
       <Section title="Statutory Benchmarks">
-        <p>Nyaya flags delays against the following legal deadlines:</p>
+        <p>Prajna flags delays against the following legal deadlines:</p>
         <table className="text-sm w-full border-collapse">
           <thead>
             <tr className="border-b border-gray-200">
@@ -139,7 +139,7 @@ export default function AboutPage() {
 
       <Section title="Open Source & Licensing">
         <p>
-          Nyaya is licensed under the{' '}
+          Prajna is licensed under the{' '}
           <a
             href="https://www.gnu.org/licenses/agpl-3.0.html"
             target="_blank"
@@ -149,7 +149,7 @@ export default function AboutPage() {
           </a>
           . Source code is available on{' '}
           <a
-            href="https://github.com/nyaya-platform/nyaya-platform"
+            href="https://github.com/prajna-platform/prajna-platform"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -166,7 +166,7 @@ export default function AboutPage() {
       <div className="mt-10 text-center">
         <Link
           href="/cases"
-          className="inline-block px-6 py-3 bg-nyaya-navy text-white rounded-lg font-medium hover:bg-nyaya-navy/90"
+          className="inline-block px-6 py-3 bg-prajna-navy text-white rounded-lg font-medium hover:bg-prajna-navy/90"
         >
           Browse Cases →
         </Link>
@@ -189,7 +189,7 @@ const BENCHMARKS = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
-      <h2 className="text-xl font-bold text-nyaya-navy mb-3 pb-1 border-b border-gray-200">
+      <h2 className="text-xl font-bold text-prajna-navy mb-3 pb-1 border-b border-gray-200">
         {title}
       </h2>
       <div className="text-gray-700 space-y-3 text-sm leading-relaxed">{children}</div>

@@ -242,7 +242,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={q}
             placeholder="Search by name, state, district, case ref…"
-            className="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nyaya-navy"
+            className="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-prajna-navy"
           />
           {CASES.length > 0 && (
             <>
@@ -266,7 +266,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
           )}
           <button
             type="submit"
-            className="px-5 py-2 bg-nyaya-navy text-white text-sm rounded-lg font-medium hover:bg-nyaya-navy/90"
+            className="px-5 py-2 bg-prajna-navy text-white text-sm rounded-lg font-medium hover:bg-prajna-navy/90"
           >
             Search
           </button>
@@ -299,7 +299,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
             <li key={c.id}>
               <Link
                 href={`/cases/${c.id}`}
-                className="block border border-gray-200 rounded-lg p-4 bg-white hover:border-nyaya-navy hover:shadow-md transition-all"
+                className="block border border-gray-200 rounded-lg p-4 bg-white hover:border-prajna-navy hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">

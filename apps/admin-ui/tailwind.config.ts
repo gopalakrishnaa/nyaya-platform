@@ -5,8 +5,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'nyaya-navy': '#1E3A5F',
-        'nyaya-crimson': '#B91C1C',
+        'prajna-navy': '#1E3A5F',
+        'prajna-crimson': '#B91C1C',
       },
     },
   },

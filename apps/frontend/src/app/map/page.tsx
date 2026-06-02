@@ -31,7 +31,7 @@ export default async function MapPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-nyaya-navy">Geographic Distribution</h1>
+        <h1 className="text-2xl font-bold text-prajna-navy">Geographic Distribution</h1>
         <p className="text-gray-500 text-sm mt-1">
           Cases tracked across India&apos;s states and union territories.
           Interactive map requires JavaScript.
@@ -90,7 +90,7 @@ export default async function MapPage() {
                     <td className="px-4 py-2.5 hidden md:table-cell">
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-nyaya-navy rounded-full"
+                          className="h-full bg-prajna-navy rounded-full"
                           style={{
                             width: `${(s.total_cases / maxCases) * 100}%`,
                           }}

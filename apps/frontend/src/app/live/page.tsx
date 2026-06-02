@@ -133,19 +133,19 @@ export default function LivePage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-bold text-nyaya-navy">🇮🇳 Live Cases — All India</h1>
+          <h1 className="text-2xl font-bold text-prajna-navy">🇮🇳 Live Cases — All India</h1>
           <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-xs font-semibold rounded-full uppercase tracking-wide">
             AI Agent
           </span>
         </div>
         <p className="text-gray-600 text-sm max-w-2xl">
           AI-extracted cases from 20 Indian states. Pipeline: Google News RSS → Claude Haiku → Supabase.
-          Follows Nyaya Guidelines §4.2 (factual extraction, victim privacy protected).
+          Follows Prajna Guidelines §4.2 (factual extraction, victim privacy protected).
         </p>
       </div>
 
       {/* Pipeline */}
-      <div className="bg-nyaya-navy text-white rounded-lg px-5 py-3 mb-6 text-sm">
+      <div className="bg-prajna-navy text-white rounded-lg px-5 py-3 mb-6 text-sm">
         <div className="flex items-center gap-2 flex-wrap text-xs">
           <span className="font-mono bg-white/10 px-2 py-1 rounded">📡 Google News RSS ×20 states</span>
           <span className="text-white/40">→</span>
@@ -180,24 +180,24 @@ export default function LivePage() {
       {agentStatus?.configured && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div className="bg-white border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-nyaya-navy">{agentStatus.total_cases ?? 0}</div>
+            <div className="text-2xl font-bold text-prajna-navy">{agentStatus.total_cases ?? 0}</div>
             <div className="text-xs text-gray-500 mt-1">Stored Cases</div>
           </div>
           <div className="bg-white border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-nyaya-navy">
+            <div className="text-2xl font-bold text-prajna-navy">
               {Object.keys(agentStatus.by_state ?? {}).length}
             </div>
             <div className="text-xs text-gray-500 mt-1">States Covered</div>
           </div>
           <div className="bg-white border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-nyaya-navy">20</div>
+            <div className="text-2xl font-bold text-prajna-navy">20</div>
             <div className="text-xs text-gray-500 mt-1">Target States</div>
           </div>
           <div className="bg-white border rounded-lg p-4 text-center">
             <button
               onClick={runAllIndiaAgent}
               disabled={agentRunning}
-              className="w-full px-3 py-2 bg-nyaya-navy text-white text-xs rounded font-medium hover:bg-nyaya-navy/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 bg-prajna-navy text-white text-xs rounded font-medium hover:bg-prajna-navy/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {agentRunning ? '⏳ Running…' : '▶ Run All-India Agent'}
             </button>
@@ -320,7 +320,7 @@ export default function LivePage() {
                 <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
                   <span>{c.source_title} · Stored {new Date(c.created_at).toLocaleDateString('en-IN')}</span>
                   <a href={c.source_url} target="_blank" rel="noopener noreferrer"
-                    className="text-nyaya-navy underline hover:no-underline">
+                    className="text-prajna-navy underline hover:no-underline">
                     Source ↗
                   </a>
                 </div>

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Nyaya ingests from 8 sources across English and 4 Indian languages. All ingestion is read-only from public data. No private APIs. No scraping that violates terms of service.
+Prajna ingests from 8 sources across English and 4 Indian languages. All ingestion is read-only from public data. No private APIs. No scraping that violates terms of service.
 
 ## Sources
 
@@ -50,7 +50,7 @@ Nyaya ingests from 8 sources across English and 4 Indian languages. All ingestio
 - **Trust score**: 1.0 (authoritative source)
 - **Fetch interval**: 6 hours
 - **Adapter**: `adapters/ecourts_adapter.py`
-- **Notes**: Provides court orders, hearing dates, judgment texts. Cases tracked via `tracked_cases` table in PostgreSQL. Only cases already in Nyaya's DB are polled.
+- **Notes**: Provides court orders, hearing dates, judgment texts. Cases tracked via `tracked_cases` table in PostgreSQL. Only cases already in Prajna's DB are polled.
 
 ### NCRB (National Crime Records Bureau)
 - **Type**: Web scraping for Excel/PDF report links
