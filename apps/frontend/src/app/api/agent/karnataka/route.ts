@@ -1,5 +1,5 @@
 /**
- * Karnataka AI Agent — Nyaya data pipeline (Guidelines §4.2)
+ * Karnataka AI Agent — Prajna data pipeline (Guidelines §4.2)
  *
  * Pipeline:
  * 1. INGEST  — fetch Google News RSS for Karnataka crime cases (simulates ANI/PTI feeds)
@@ -38,7 +38,7 @@ async function fetchNewsRss(query: string): Promise<NewsItem[]> {
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'NyayaBot/1.0 (+https://nyayaplatform.vercel.app)' },
+      headers: { 'User-Agent': 'PrajnaBot/1.0 (+https://nyayaplatform.vercel.app)' },
       signal: AbortSignal.timeout(10_000),
     })
     const xml = await res.text()
@@ -148,9 +148,9 @@ export async function GET() {
     const { object } = await generateObject({
       model: google('gemini-flash-latest'),
       schema: ExtractedCaseSchema,
-      system: `You are a legal data extraction agent for the Nyaya platform — an open-source justice transparency system tracking crimes against women in India (nyayaplatform.vercel.app).
+      system: `You are a legal data extraction agent for the Prajna platform — an open-source justice transparency system tracking crimes against women in India (nyayaplatform.vercel.app).
 
-Your role follows Nyaya Guidelines §4.2 — AI Extraction:
+Your role follows Prajna Guidelines §4.2 — AI Extraction:
 - Extract ONLY factual information explicitly stated in the article
 - NEVER infer, embellish, or guess details not mentioned
 - Protect victim privacy: never include names, use district-level location only
@@ -168,7 +168,7 @@ ${corpus}`,
     // Convert to CaseSummary-compatible format with live metadata
     const cases = object.cases.map((c, i) => ({
       id: `ka-agent-${Date.now()}-${i}`,
-      case_ref: `NYA-LIVE-KA-${new Date().getFullYear()}-${String(i + 1).padStart(4, '0')}`,
+      case_ref: `PRJ-LIVE-KA-${new Date().getFullYear()}-${String(i + 1).padStart(4, '0')}`,
       victim_pseudonym: `VICTIM-KA-${String(i + 1).padStart(6, '0')}`,
       crime_category: c.crime_category,
       status: c.status,
@@ -200,7 +200,7 @@ ${corpus}`,
         cases_extracted: cases.length,
         fetched_at: new Date().toISOString(),
         model: 'gemini-flash-latest',
-        pipeline: 'Google News RSS → Claude extraction (Nyaya Guidelines §4.2)',
+        pipeline: 'Google News RSS → Claude extraction (Prajna Guidelines §4.2)',
       },
     })
   } catch (err) {

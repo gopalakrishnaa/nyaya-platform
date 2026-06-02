@@ -39,7 +39,7 @@ export default function HomePage() {
     <div>
       {/* Hero */}
       <section className="text-center py-16 border-b border-gray-200 mb-12">
-        <h1 className="text-4xl font-bold text-nyaya-navy mb-4">
+        <h1 className="text-4xl font-bold text-prajna-navy mb-4">
           न्याय — Justice Transparency
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
@@ -52,12 +52,12 @@ export default function HomePage() {
               type="search"
               name="q"
               placeholder="Search cases by state, crime type, court..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nyaya-navy text-base"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-prajna-navy text-base"
               aria-label="Search cases"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-nyaya-navy text-white rounded-lg font-medium hover:bg-nyaya-navy/90"
+              className="px-6 py-3 bg-prajna-navy text-white rounded-lg font-medium hover:bg-prajna-navy/90"
             >
               Search
             </button>
@@ -78,8 +78,8 @@ export default function HomePage() {
       {/* Recent updates */}
       <section>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-nyaya-navy">Recent Case Updates</h2>
-          <Link href="/cases" className="text-sm text-nyaya-navy underline">
+          <h2 className="text-2xl font-bold text-prajna-navy">Recent Case Updates</h2>
+          <Link href="/cases" className="text-sm text-prajna-navy underline">
             View all cases →
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default function HomePage() {
             <li key={c.id}>
               <Link
                 href={`/cases/${c.id}`}
-                className="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:border-nyaya-navy hover:shadow-sm transition-all"
+                className="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:border-prajna-navy hover:shadow-sm transition-all"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -128,7 +128,7 @@ export default function HomePage() {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
-      <div className="text-3xl font-bold text-nyaya-navy">{value}</div>
+      <div className="text-3xl font-bold text-prajna-navy">{value}</div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
     </div>
   )

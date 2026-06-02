@@ -2,7 +2,7 @@
 
 ## System Design
 
-Nyaya is a monorepo of microservices communicating via Apache Kafka. All persistent state lives in PostgreSQL 16 (primary truth) and OpenSearch 2.x (search replica). The public surface area is a read-only FastAPI backend and a Next.js 14 SSR frontend.
+Prajna is a monorepo of microservices communicating via Apache Kafka. All persistent state lives in PostgreSQL 16 (primary truth) and OpenSearch 2.x (search replica). The public surface area is a read-only FastAPI backend and a Next.js 14 SSR frontend.
 
 ```
 Internet

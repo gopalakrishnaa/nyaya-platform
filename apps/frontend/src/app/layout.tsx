@@ -4,13 +4,13 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Nyaya — Justice Transparency Platform',
-    template: '%s | Nyaya',
+    default: 'Prajna — Justice Transparency Platform',
+    template: '%s | Prajna',
   },
   description:
     'Tracking crimes against women through India\'s legal system — from FIR to conviction.',
   openGraph: {
-    siteName: 'Nyaya न्याय',
+    siteName: 'Prajna न्याय',
     type: 'website',
   },
 }
@@ -38,24 +38,24 @@ export default function RootLayout({
             <div className="flex items-center justify-between h-16">
               <Link
                 href="/"
-                className="flex items-center gap-2 font-bold text-lg text-nyaya-navy hover:opacity-80"
+                className="flex items-center gap-2 font-bold text-lg text-prajna-navy hover:opacity-80"
               >
-                <span className="text-nyaya-crimson">⚖</span>
-                <span>Nyaya</span>
+                <span className="text-prajna-crimson">⚖</span>
+                <span>Prajna</span>
                 <span className="text-sm font-normal text-gray-500 hidden sm:inline">न्याय</span>
               </Link>
 
               <div className="flex items-center gap-6">
-                <Link href="/cases" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium">
+                <Link href="/cases" className="text-sm text-gray-600 hover:text-prajna-navy font-medium">
                   Cases
                 </Link>
-                <Link href="/map" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium">
+                <Link href="/map" className="text-sm text-gray-600 hover:text-prajna-navy font-medium">
                   Map
                 </Link>
-                <Link href="/live" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium flex items-center gap-1">
+                <Link href="/live" className="text-sm text-gray-600 hover:text-prajna-navy font-medium flex items-center gap-1">
                   <span>🤖</span> Live
                 </Link>
-                <Link href="/about" className="text-sm text-gray-600 hover:text-nyaya-navy font-medium">
+                <Link href="/about" className="text-sm text-gray-600 hover:text-prajna-navy font-medium">
                   About
                 </Link>
               </div>
@@ -69,13 +69,13 @@ export default function RootLayout({
 
         <footer className="border-t border-gray-200 mt-16 py-8 text-center text-sm text-gray-500">
           <p>
-            Nyaya न्याय — Open-source justice transparency platform |{' '}
+            Prajna न्याय — Open-source justice transparency platform |{' '}
             <Link href="/about" className="underline">
               About & Methodology
             </Link>{' '}
             |{' '}
             <a
-              href="https://github.com/nyaya-platform/nyaya-platform"
+              href="https://github.com/prajna-platform/prajna-platform"
               className="underline"
               target="_blank"
               rel="noopener noreferrer"

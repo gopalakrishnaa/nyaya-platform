@@ -4,7 +4,7 @@
     {
       "name": "frontend",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@nyaya/frontend", "dev"],
+      "runtimeArgs": ["--filter", "@prajna/frontend", "dev"],
       "port": 3000
     }
   ]

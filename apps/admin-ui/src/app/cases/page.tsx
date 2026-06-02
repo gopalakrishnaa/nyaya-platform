@@ -26,7 +26,7 @@ export default async function AdminCasesPage({ searchParams }: PageProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-nyaya-navy">Cases</h1>
+        <h1 className="text-2xl font-bold text-prajna-navy">Cases</h1>
         <p className="text-sm text-gray-500">{data.total.toLocaleString('en-IN')} total</p>
       </div>
 

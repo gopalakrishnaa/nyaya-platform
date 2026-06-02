@@ -67,7 +67,7 @@ export function makeCase(idx: number): CaseSummary {
 
   return {
     id: `case-${idx.toString().padStart(6, '0')}`,
-    case_ref: `NYA-${year}-${stateCode}-${idx.toString().padStart(6, '0')}`,
+    case_ref: `PRJ-${year}-${stateCode}-${idx.toString().padStart(6, '0')}`,
     victim_pseudonym: `VICTIM-${idx.toString(16).padStart(6, '0')}`,
     crime_category: category,
     status,

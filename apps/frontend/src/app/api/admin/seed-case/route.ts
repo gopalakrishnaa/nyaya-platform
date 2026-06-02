@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 const REAL_CASES = [
   {
     id: 'live-mp-twisha-sharma-2026',
-    case_ref: 'NYA-LIVE-MP-2026-TWISHA',
+    case_ref: 'PRJ-LIVE-MP-2026-TWISHA',
     crime_category: 'DOWRY_DEATH',
     status: 'UNDER_INVESTIGATION',
     incident_date: null,

@@ -1,5 +1,5 @@
 /**
- * Timeline events and static metadata for high-profile real cases tracked by Nyaya.
+ * Timeline events and static metadata for high-profile real cases tracked by Prajna.
  * Sourced from public reporting; updated manually as cases progress.
  * Keyed by live_cases.id.
  *
@@ -34,7 +34,7 @@ const HINDU = {
 export const LIVE_CASES_STATIC: CaseDetail[] = [
   {
     id: 'live-mp-twisha-sharma-2026',
-    case_ref: 'NYA-LIVE-MP-2026-TWISHA',
+    case_ref: 'PRJ-LIVE-MP-2026-TWISHA',
     victim_pseudonym: 'VICTIM-TWISHA-MP26', // real name is in headline field; pseudonym field must not hold PII
     crime_category: 'DOWRY_DEATH',
     status: 'UNDER_INVESTIGATION',

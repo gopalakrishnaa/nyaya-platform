@@ -27,7 +27,7 @@ export default async function AuditLogPage({ searchParams }: PageProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-nyaya-navy">Audit Log</h1>
+        <h1 className="text-2xl font-bold text-prajna-navy">Audit Log</h1>
         <p className="text-xs text-gray-400">Immutable. All admin actions recorded.</p>
       </div>
 

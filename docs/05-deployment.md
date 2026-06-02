@@ -11,8 +11,8 @@
 
 ```bash
 # 1. Clone and install dependencies
-git clone https://github.com/nyaya-platform/nyaya-platform
-cd nyaya-platform
+git clone https://github.com/prajna-platform/prajna-platform
+cd prajna-platform
 pnpm install
 
 # 2. Copy and fill environment variables

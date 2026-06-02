@@ -77,7 +77,7 @@ export function CasesTable({ items, token }: Props) {
                     href={`${process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'http://localhost:3000'}/cases/${c.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-nyaya-navy hover:underline mr-3"
+                    className="text-xs text-prajna-navy hover:underline mr-3"
                   >
                     View ↗
                   </a>
