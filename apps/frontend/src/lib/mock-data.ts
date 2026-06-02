@@ -106,15 +106,8 @@ export function makeEvents(c: CaseSummary): CaseEvent[] {
       event_date_approx: false,
       summary: `${etype.replace(/_/g, ' ')} recorded in ${c.district}, ${c.state}.`,
       court_name: hasCourt ? `${c.district} Sessions Court` : null,
-      source_attribution: [
-        {
-          source_code: 'ANI',
-          source_name: 'Asian News International',
-          published_at: dateStr + 'T00:00:00',
-          source_url: '',
-        },
-      ],
-      source_quote: `The ${etype.toLowerCase().replace(/_/g, ' ')} was confirmed by officials in ${c.district}.`,
+      source_attribution: [],
+      source_quote: null,
       confidence_score: Math.round((rng.random() * (0.98 - 0.75) + 0.75) * 100) / 100,
       moderation_status: 'APPROVED',
       is_milestone: ['FIR_REGISTERED', 'CONVICTION', 'JUDGMENT_DELIVERED', 'ARREST_MADE'].includes(etype),
