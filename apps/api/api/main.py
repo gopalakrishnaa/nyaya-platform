@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .middleware.audit import AuditMiddleware
 from .middleware.request_id import RequestIDMiddleware
-from .routers import admin, cases, export, health, moderation, search, stats
+from .routers import admin, ask, cases, export, health, moderation, search, stats
 
 
 def configure_logging() -> None:
@@ -53,6 +53,7 @@ app.add_middleware(RequestIDMiddleware)
 app.include_router(health.router)
 app.include_router(cases.router)
 app.include_router(search.router)
+app.include_router(ask.router)
 app.include_router(stats.router)
 app.include_router(moderation.router)
 app.include_router(admin.router)

@@ -22,6 +22,11 @@ class Settings(BaseSettings):
 
     api_rate_limit_public: int = 100  # per minute
     api_rate_limit_api_key: int = 1000  # per minute
+    api_rate_limit_ask: int = 10  # per minute (LLM-backed, costly)
+
+    anthropic_api_key: str = ""
+    ask_model: str = "claude-sonnet-4-6"
+    ask_max_cases: int = 10
 
     cors_origins: list[str] = ["http://localhost:3000"]
 
