@@ -46,6 +46,9 @@ export default function RootLayout({
               </Link>
 
               <div className="flex items-center gap-6">
+                <Link href="/ask" className="text-sm text-prajna-saffron hover:text-prajna-navy font-semibold flex items-center gap-1">
+                  <span>✦</span> Ask
+                </Link>
                 <Link href="/cases" className="text-sm text-gray-600 hover:text-prajna-navy font-medium">
                   Cases
                 </Link>
