@@ -92,18 +92,21 @@ export async function POST(req: NextRequest) {
     ...mockFinal.map(c => formatCase(c, makeEvents(c), false)),
   ].join('\n\n')
 
-  const result = streamText({
-    model: anthropic('claude-sonnet-4-6'),
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user' as const,
-        content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}\n\nQuestion: ${question}`,
-      },
-    ],
-    temperature: 0,
-    maxOutputTokens: 1024,
-  })
-
-  return result.toTextStreamResponse()
+  try {
+    const result = streamText({
+      model: anthropic('claude-3-5-haiku-20241022'),
+      system: SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user' as const,
+          content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}\n\nQuestion: ${question}`,
+        },
+      ],
+      maxOutputTokens: 1024,
+    })
+    return result.toTextStreamResponse()
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return new Response(JSON.stringify({ error: msg }), { status: 500 })
+  }
 }
