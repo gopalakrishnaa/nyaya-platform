@@ -121,6 +121,7 @@ export default async function CaseDetailPage({ params }: PageProps) {
   if (!raw) notFound()
   const c = raw as NonNullable<typeof raw>
 
+  const isMock = params.id.startsWith('case-')
   const currentStage = CURRENT_STAGE_MAP[c.status] ?? 'FIR'
   const statusColor = STATUS_COLORS[c.status] ?? 'bg-gray-100 text-gray-700'
 
@@ -142,6 +143,18 @@ export default async function CaseDetailPage({ params }: PageProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Demo data notice */}
+      {isMock && (
+        <div className="mb-6 flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          <span className="text-lg leading-none">🧪</span>
+          <div>
+            <strong>Demo case — synthetic data only.</strong> This case and its timeline events are
+            procedurally generated for demonstration purposes. Names, dates, and court details are
+            fictional. No real news sources exist for these events.
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 flex-wrap mb-3">
