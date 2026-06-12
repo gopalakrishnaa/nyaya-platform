@@ -1,26 +1,52 @@
 import Link from 'next/link'
 import { CASES } from '@/lib/mock-data'
+import { LIVE_CASES_STATIC } from '@/lib/live-case-events'
 import type { PlatformStats } from '@/lib/api'
 
 function getStats(): PlatformStats {
-  const convictions = CASES.filter(c => c.conviction_achieved).length
-  const states = new Set(CASES.map(c => c.state)).size
-  const pocso = CASES.filter(c => c.pocso_applicable).length
-  const fastTrack = CASES.filter(c => c.fast_track_court).length
+  const all = [...CASES, ...LIVE_CASES_STATIC]
+  const convictions = all.filter(c => c.conviction_achieved).length
+  const states = new Set(all.map(c => c.state)).size
+  const pocso = all.filter(c => c.pocso_applicable).length
+  const fastTrack = all.filter(c => c.fast_track_court).length
   return {
-    total_cases: CASES.length,
+    total_cases: all.length,
     total_convictions: convictions,
     states_covered: states,
-    avg_conviction_rate: convictions / CASES.length,
+    avg_conviction_rate: convictions / all.length,
     total_pocso: pocso,
     total_fast_track: fastTrack,
   }
 }
 
 function getRecentCases() {
-  return [...CASES]
+  const allCases = [
+    ...LIVE_CASES_STATIC.map(c => ({
+      id: c.id,
+      case_ref: c.case_ref,
+      crime_category: c.crime_category,
+      status: c.status,
+      state: c.state,
+      district: c.district,
+      pocso_applicable: c.pocso_applicable,
+      last_event_at: c.last_event_at,
+      is_live: true,
+    })),
+    ...CASES.map(c => ({
+      id: c.id,
+      case_ref: c.case_ref,
+      crime_category: c.crime_category,
+      status: c.status,
+      state: c.state,
+      district: c.district,
+      pocso_applicable: c.pocso_applicable,
+      last_event_at: c.last_event_at ?? null,
+      is_live: false,
+    })),
+  ]
+  return allCases
     .sort((a, b) => (b.last_event_at ?? '').localeCompare(a.last_event_at ?? ''))
-    .slice(0, 3)
+    .slice(0, 5)
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -67,12 +93,12 @@ export default function HomePage() {
 
       {/* Stats */}
       <section className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12" aria-label="Platform statistics">
-        <StatCard label="Total Cases" value={stats.total_cases.toLocaleString('en-IN')} />
-        <StatCard label="Convictions" value={stats.total_convictions.toLocaleString('en-IN')} />
-        <StatCard label="States Covered" value={stats.states_covered.toString()} />
-        <StatCard label="POCSO Cases" value={stats.total_pocso.toLocaleString('en-IN')} />
-        <StatCard label="Fast-Track Cases" value={stats.total_fast_track.toLocaleString('en-IN')} />
-        <StatCard label="Conviction Rate" value={`${(stats.avg_conviction_rate * 100).toFixed(1)}%`} />
+        <StatCard label="Total Cases" value={stats.total_cases.toLocaleString('en-IN')} href="/cases" />
+        <StatCard label="Convictions" value={stats.total_convictions.toLocaleString('en-IN')} href="/cases?conviction=true" />
+        <StatCard label="States Covered" value={stats.states_covered.toString()} href="/cases" />
+        <StatCard label="POCSO Cases" value={stats.total_pocso.toLocaleString('en-IN')} href="/cases?pocso=true" />
+        <StatCard label="Fast-Track Cases" value={stats.total_fast_track.toLocaleString('en-IN')} href="/cases?fast_track=true" />
+        <StatCard label="Conviction Rate" value={`${(stats.avg_conviction_rate * 100).toFixed(1)}%`} href="/cases?conviction=true" />
       </section>
 
       {/* Recent updates */}
@@ -99,12 +125,15 @@ export default function HomePage() {
                     {c.pocso_applicable && (
                       <span className="px-2 py-0.5 rounded-full text-xs bg-orange-100 text-orange-700">POCSO</span>
                     )}
+                    {c.is_live && (
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 font-medium">Live</span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     {c.district}, {c.state}
                     {c.last_event_at && (
                       <span className="ml-2 text-gray-400">
-                        — {new Date(c.last_event_at).toLocaleDateString('en-IN')}
+                        — updated {new Date(c.last_event_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     )}
                   </p>
@@ -125,11 +154,14 @@ export default function HomePage() {
   )
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
+    <Link
+      href={href}
+      className="bg-white border border-gray-200 rounded-lg p-6 text-center hover:border-prajna-navy hover:shadow-sm transition-all block"
+    >
       <div className="text-3xl font-bold text-prajna-navy">{value}</div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
-    </div>
+    </Link>
   )
 }
