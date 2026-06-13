@@ -6,7 +6,16 @@
  * Data sourced from Google News / public reporting as of June 2026.
  */
 import { NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
+
+/** Constant-time string compare to avoid leaking the secret via timing. */
+function secretsMatch(a: string, b: string): boolean {
+  const ab = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ab.length !== bb.length) return false
+  return timingSafeEqual(ab, bb)
+}
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -37,9 +46,10 @@ const REAL_CASES = [
 export async function GET(req: Request) {
   // Require secret header to prevent unauthenticated DB writes.
   // Set ADMIN_SECRET in Vercel env vars (Settings → Environment Variables).
+  // Header-only — never via query param (would leak into logs/history/Referer).
   const secret = process.env.ADMIN_SECRET
-  const provided = req.headers.get('x-admin-secret') ?? new URL(req.url).searchParams.get('secret')
-  if (!secret || provided !== secret) {
+  const provided = req.headers.get('x-admin-secret')
+  if (!secret || !provided || !secretsMatch(provided, secret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
