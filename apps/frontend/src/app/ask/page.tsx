@@ -139,13 +139,15 @@ export default function AskPage() {
                         </p>
                       )}
                     </>
-                  ) : (
+                  ) : streaming ? (
                     <span className="flex gap-1">
                       {[0, 1, 2].map((j) => (
                         <span key={j} className="w-2 h-2 rounded-full bg-gray-300 animate-bounce"
                           style={{ animationDelay: `${j * 0.15}s` }} />
                       ))}
                     </span>
+                  ) : (
+                    <span className="text-gray-400 text-xs">No answer received. Try rephrasing your question.</span>
                   )}
                 </div>
               )}
