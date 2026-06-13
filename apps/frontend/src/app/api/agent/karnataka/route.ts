@@ -8,10 +8,11 @@
  *
  * Requires: GOOGLE_GENERATIVE_AI_API_KEY env var set in Vercel project settings.
  */
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -102,7 +103,15 @@ const ExtractedCaseSchema = z.object({
 
 // ── 3. ROUTE ──────────────────────────────────────────────────────────────────
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Throttle: each call fans out 5 RSS fetches + a Gemini call. Cap abuse.
+  if (!rateLimit(`agent-ka:${clientIp(req)}`, 3, 60_000)) {
+    return NextResponse.json(
+      { error: 'Too many requests. Try again shortly.' },
+      { status: 429, headers: { 'Retry-After': '60' } }
+    )
+  }
+
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return NextResponse.json(
       {
@@ -204,9 +213,7 @@ ${corpus}`,
       },
     })
   } catch (err) {
-    return NextResponse.json(
-      { error: `Extraction failed: ${err instanceof Error ? err.message : String(err)}` },
-      { status: 500 }
-    )
+    console.error('agent_karnataka_error', err)
+    return NextResponse.json({ error: 'Extraction failed.' }, { status: 500 })
   }
 }

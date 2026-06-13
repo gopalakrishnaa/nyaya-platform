@@ -10,7 +10,12 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest } from 'next/server'
 import { CASES, makeEvents } from '@/lib/mock-data'
 import { LIVE_CASES_STATIC, LIVE_CASE_EVENTS } from '@/lib/live-case-events'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 import type { CaseSummary, CaseEvent } from '@/lib/api'
+
+const MAX_QUESTION_LEN = 500
+const RATE_LIMIT = 10 // requests
+const RATE_WINDOW_MS = 60_000 // per minute per IP
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -61,11 +66,21 @@ function formatCase(c: CaseSummary, events: CaseEvent[], isLive: boolean): strin
 }
 
 export async function POST(req: NextRequest) {
+  if (!rateLimit(`ask:${clientIp(req)}`, RATE_LIMIT, RATE_WINDOW_MS)) {
+    return new Response(JSON.stringify({ error: 'Too many requests. Try again shortly.' }), {
+      status: 429,
+      headers: { 'Retry-After': '60' },
+    })
+  }
+
   const body = await req.json().catch(() => ({}))
   const question: string = (body.question ?? '').trim()
 
   if (!question || question.length < 5) {
     return new Response(JSON.stringify({ error: 'Question too short' }), { status: 400 })
+  }
+  if (question.length > MAX_QUESTION_LEN) {
+    return new Response(JSON.stringify({ error: `Question too long (max ${MAX_QUESTION_LEN} chars)` }), { status: 400 })
   }
 
   const filters = extractFilters(question)
@@ -92,18 +107,21 @@ export async function POST(req: NextRequest) {
     ...mockFinal.map(c => formatCase(c, makeEvents(c), false)),
   ].join('\n\n')
 
-  const result = streamText({
-    model: anthropic('claude-sonnet-4-6'),
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user' as const,
-        content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}\n\nQuestion: ${question}`,
-      },
-    ],
-    temperature: 0,
-    maxOutputTokens: 1024,
-  })
-
-  return result.toTextStreamResponse()
+  try {
+    const result = streamText({
+      model: anthropic('claude-3-5-haiku-20241022'),
+      system: SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user' as const,
+          content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}\n\nQuestion: ${question}`,
+        },
+      ],
+      maxOutputTokens: 1024,
+    })
+    return result.toTextStreamResponse()
+  } catch (err: unknown) {
+    console.error('ask_route_error', err)
+    return new Response(JSON.stringify({ error: 'Failed to generate answer.' }), { status: 500 })
+  }
 }
