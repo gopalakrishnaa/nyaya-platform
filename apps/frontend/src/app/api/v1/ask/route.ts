@@ -10,6 +10,7 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest } from 'next/server'
 import { CASES, makeEvents } from '@/lib/mock-data'
 import { LIVE_CASES_STATIC, LIVE_CASE_EVENTS } from '@/lib/live-case-events'
+import { LEGAL_PRECEDENTS } from '@/lib/legal-precedents'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 import type { CaseSummary, CaseEvent } from '@/lib/api'
 
@@ -23,7 +24,7 @@ export const dynamic = 'force-dynamic'
 const SYSTEM_PROMPT = `You are Prajna AI — an analyst for the Prajna platform that tracks crimes against women through India's judicial system.
 
 You answer questions using ONLY the documented case data provided below. Rules:
-1. Every factual claim must cite at least one case reference in square brackets e.g. [PRJ-2024-MH-000042]. No citation = no claim.
+1. Every factual claim must cite at least one case reference in square brackets e.g. [PRJ-2024-MH-000042] or a legal precedent e.g. [Vishaka v. State of Rajasthan (1997) 6 SCC 241]. No citation = no claim.
 2. If the provided cases are insufficient to answer, say so plainly — never guess or use outside knowledge.
 3. Never name or speculate about victims or accused. Use only case references and locations.
 4. Compute statistics (averages, medians, counts) directly from the data. Show the calculation briefly.
@@ -51,6 +52,29 @@ function extractFilters(q: string): { state?: string; crime?: string; pocso?: bo
   const pocso = ql.includes('pocso')
   const conviction = ql.includes('convict') || ql.includes('conviction')
   return { state, crime: crime ?? (pocso ? 'POCSO_VIOLATION' : undefined), pocso, conviction }
+}
+
+// Keyword → precedent category mapping
+const PRECEDENT_KEYWORDS: Record<string, string[]> = {
+  SEXUAL_VIOLENCE_CONSENT: ['rape', 'gang rape', 'sexual assault', 'consent', 'corroboration', 'mathura', 'nirbhaya', 'pocso', 'attempt to rape'],
+  DOMESTIC_VIOLENCE_CRUELTY: ['498a', 'domestic', 'cruelty', 'matrimonial', 'stree-dhan', 'streedhan', 'arrest', 'jurisdiction'],
+  DOWRY_DEATH_SUICIDE: ['dowry', '304b', '306', 'abetment', 'suicide', 'soon before', 'presumption'],
+  WORKPLACE_PUBLIC_SPACES: ['workplace', 'posh', 'icc', 'sexual harassment', 'vishaka', 'modesty', 'eve-teasing', 'public space'],
+  CYBER_CRIME_DIGITAL_VIOLENCE: ['cyber', 'online', 'it act', 'morphing', 'deepfake', 'deep fake', 'digital', 'social media', 'obscene', 'blackmail', 'revenge porn', 'non-consensual', 'right to be forgotten'],
+}
+
+function relevantPrecedents(question: string): string {
+  const ql = question.toLowerCase()
+  const matched = LEGAL_PRECEDENTS.filter(p => {
+    const catKeywords = PRECEDENT_KEYWORDS[p.category] ?? []
+    return catKeywords.some(k => ql.includes(k)) ||
+      ql.includes(p.citation.toLowerCase().split(' v.')[0].trim().toLowerCase()) ||
+      ql.includes(p.year.toString())
+  }).slice(0, 8)
+  if (matched.length === 0) return ''
+  return '\n\nRelevant legal precedents:\n' + matched.map(p =>
+    `[${p.citation} ${p.scc_citation ?? p.year}] ${p.key_principle} — ${p.source_url}`
+  ).join('\n')
 }
 
 function formatCase(c: CaseSummary, events: CaseEvent[], isLive: boolean): string {
@@ -114,7 +138,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: 'user' as const,
-          content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}\n\nQuestion: ${question}`,
+          content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}${relevantPrecedents(question)}\n\nQuestion: ${question}`,
         },
       ],
       maxOutputTokens: 1024,
