@@ -7,6 +7,7 @@ export interface CaseSummary {
   id: string
   case_ref: string
   victim_pseudonym: string
+  headline?: string | null
   crime_category: string
   status: string
   incident_date: string | null

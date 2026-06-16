@@ -182,7 +182,7 @@ export default function AskPage() {
       </form>
 
       <p className="text-center text-xs text-gray-400 mt-3">
-        Currently uses demo + Twisha Sharma (live) cases ·{' '}
+        Uses demo cases + 6 documented real cases (Nirbhaya, Bilkis Bano, Kathua, Unnao, Hathras, Twisha) ·{' '}
         <Link href="/cases" className="underline hover:text-gray-600">browse all cases</Link>
       </p>
     </div>
