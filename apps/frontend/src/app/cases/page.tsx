@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { CASES } from '@/lib/mock-data'
 import { fuzzyMatch } from '@/lib/fuzzy'
 import { LIVE_CASE_EVENTS, LIVE_CASES_STATIC } from '@/lib/live-case-events'
 
@@ -99,46 +98,7 @@ async function fetchLiveCases(q?: string): Promise<DisplayCase[]> {
   }
 }
 
-function queryMockCases(params: {
-  page: number; q?: string; state?: string; crime_category?: string;
-  status?: string; pocso?: boolean; fast_track?: boolean; conviction?: boolean;
-}): DisplayCase[] {
-  let items = CASES.map((c) => ({
-    id: c.id,
-    case_ref: c.case_ref,
-    headline: null,
-    crime_category: c.crime_category,
-    status: c.status,
-    incident_date: c.incident_date ?? null,
-    state: c.state,
-    district: c.district,
-    ipc_sections: c.ipc_sections,
-    pocso_applicable: c.pocso_applicable,
-    fast_track_court: c.fast_track_court,
-    num_victims: c.num_victims ?? null,
-    conviction_achieved: c.conviction_achieved,
-    overall_confidence: c.overall_confidence ?? null,
-    last_event_at: c.last_event_at ?? null,
-    event_count: c.event_count,
-    is_live: false,
-  } as DisplayCase))
-
-  if (params.state) items = items.filter(c => fuzzyMatch(params.state!, c.state))
-  if (params.crime_category) items = items.filter(c => c.crime_category === params.crime_category)
-  if (params.status) items = items.filter(c => c.status === params.status)
-  if (params.pocso) items = items.filter(c => c.pocso_applicable)
-  if (params.fast_track) items = items.filter(c => c.fast_track_court)
-  if (params.conviction) items = items.filter(c => c.conviction_achieved)
-  if (params.q) {
-    items = items.filter(c =>
-      fuzzyMatch(params.q!, c.state) ||
-      fuzzyMatch(params.q!, c.district) ||
-      c.crime_category.toLowerCase().includes(params.q!.toLowerCase()) ||
-      c.case_ref.toLowerCase().includes(params.q!.toLowerCase())
-    )
-  }
-  return items
-}
+const ACTIVE_STATUSES = new Set(['UNDER_INVESTIGATION', 'CHARGESHEET_FILED', 'TRIAL_IN_PROGRESS', 'REPORTED'])
 
 function pageUrl(page: number, params: Record<string, string | undefined>) {
   const sp = new URLSearchParams()
@@ -160,11 +120,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
   const conviction = searchParams.conviction === 'true' ? true : undefined
   const hasFilters = !!(q || state || crime_category || status || pocso || fast_track || conviction)
 
-  // Fetch live cases (Supabase) and mock cases in parallel
-  const [liveCases, mockCases] = await Promise.all([
-    fetchLiveCases(q),
-    Promise.resolve(queryMockCases({ page: 1, q, state, crime_category, status, pocso, fast_track, conviction })),
-  ])
+  const liveCases = await fetchLiveCases(q)
 
   // Build static-registry cases (always present, no Supabase needed)
   const staticCases: DisplayCase[] = LIVE_CASES_STATIC.map((sc) => ({
@@ -213,17 +169,10 @@ export default async function CasesPage({ searchParams }: PageProps) {
     )
   }
 
-  // Merge: live cases first, then mock — deduplicate by id
-  const seen = new Set<string>()
-  const allCases: DisplayCase[] = []
-  for (const c of [...filteredLive, ...mockCases]) {
-    if (!seen.has(c.id)) { seen.add(c.id); allCases.push(c) }
-  }
-
-  const total = allCases.length
+  const total = filteredLive.length
   const totalPages = Math.ceil(total / PAGE_SIZE)
   const start = (page - 1) * PAGE_SIZE
-  const items = allCases.slice(start, start + PAGE_SIZE)
+  const items = filteredLive.slice(start, start + PAGE_SIZE)
 
   const filterParams = {
     q, state, crime_category, status,
@@ -244,26 +193,24 @@ export default async function CasesPage({ searchParams }: PageProps) {
             placeholder="Search by name, state, district, case ref…"
             className="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-prajna-navy"
           />
-          {CASES.length > 0 && (
-            <>
-              <select name="state" className="text-sm border rounded-lg px-3 py-2">
-                <option value="">All states</option>
-                {STATES.map(s => <option key={s} value={s} selected={state === s}>{s}</option>)}
-              </select>
-              <select name="crime_category" className="text-sm border rounded-lg px-3 py-2">
-                <option value="">All crime types</option>
-                {CRIME_CATEGORIES.map(c => (
-                  <option key={c} value={c} selected={crime_category === c}>{CATEGORY_LABELS[c]}</option>
-                ))}
-              </select>
-              <select name="status" className="text-sm border rounded-lg px-3 py-2">
-                <option value="">All statuses</option>
-                {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                  <option key={v} value={v} selected={status === v}>{l}</option>
-                ))}
-              </select>
-            </>
-          )}
+          <>
+            <select name="state" className="text-sm border rounded-lg px-3 py-2">
+              <option value="">All states</option>
+              {STATES.map(s => <option key={s} value={s} selected={state === s}>{s}</option>)}
+            </select>
+            <select name="crime_category" className="text-sm border rounded-lg px-3 py-2">
+              <option value="">All crime types</option>
+              {CRIME_CATEGORIES.map(c => (
+                <option key={c} value={c} selected={crime_category === c}>{CATEGORY_LABELS[c]}</option>
+              ))}
+            </select>
+            <select name="status" className="text-sm border rounded-lg px-3 py-2">
+              <option value="">All statuses</option>
+              {Object.entries(STATUS_LABELS).map(([v, l]) => (
+                <option key={v} value={v} selected={status === v}>{l}</option>
+              ))}
+            </select>
+          </>
           <button
             type="submit"
             className="px-5 py-2 bg-prajna-navy text-white text-sm rounded-lg font-medium hover:bg-prajna-navy/90"
@@ -281,9 +228,9 @@ export default async function CasesPage({ searchParams }: PageProps) {
       {/* Result count */}
       <p className="text-sm text-gray-600 mb-4">
         {total.toLocaleString('en-IN')} case{total !== 1 ? 's' : ''} found
-        {filteredLive.length > 0 && (
+        {filteredLive.filter(c => ACTIVE_STATUSES.has(c.status)).length > 0 && (
           <span className="ml-2 text-emerald-600 font-medium">
-            · {filteredLive.length} live
+            · {filteredLive.filter(c => ACTIVE_STATUSES.has(c.status)).length} active
           </span>
         )}
       </p>
@@ -304,7 +251,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-xs text-gray-400">{c.case_ref}</span>
-                    {c.is_live && (
+                    {ACTIVE_STATUSES.has(c.status) && (
                       <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700 font-semibold">
                         LIVE
                       </span>
