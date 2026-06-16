@@ -11,7 +11,7 @@
  */
 import type { CaseEvent, CaseDetail } from './api'
 
-// Source helpers
+// Source helpers — legal-grade sources only
 const toi = (url: string, published_at: string | null = null) => ({
   source_code: 'TOI', source_name: 'Times of India', published_at, source_url: url,
 })
@@ -22,13 +22,19 @@ const ndtv = (url: string, published_at: string | null = null) => ({
   source_code: 'NDTV', source_name: 'NDTV', published_at, source_url: url,
 })
 const sc = (url: string, published_at: string | null = null) => ({
-  source_code: 'SC', source_name: 'Supreme Court of India', published_at, source_url: url,
-})
-const wire = (url: string, published_at: string | null = null) => ({
-  source_code: 'WIRE', source_name: 'The Wire', published_at, source_url: url,
+  source_code: 'SC', source_name: 'Supreme Court of India (Official)', published_at, source_url: url,
 })
 const ie = (url: string, published_at: string | null = null) => ({
   source_code: 'IE', source_name: 'Indian Express', published_at, source_url: url,
+})
+const ik = (url: string, published_at: string | null = null) => ({
+  source_code: 'IK', source_name: 'Indian Kanoon', published_at, source_url: url,
+})
+const ll = (url: string, published_at: string | null = null) => ({
+  source_code: 'LL', source_name: 'LiveLaw', published_at, source_url: url,
+})
+const bb = (url: string, published_at: string | null = null) => ({
+  source_code: 'BB', source_name: 'Bar and Bench', published_at, source_url: url,
 })
 
 // ─── Static case registry ─────────────────────────────────────────────────────
@@ -351,7 +357,8 @@ export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
       summary: 'Bilkis Bano (19, five months pregnant) gang-raped by a mob during 2002 Gujarat riots in Limkheda, Dahod district. 14 members of her family killed. FIR filed.',
       court_name: null,
       source_attribution: [
-        wire('https://thewire.in/law/bilkis-bano-case-explainer-timeline', '2002-03-03'),
+        ll('https://www.livelaw.in/tags/bilkis-bano-case', '2002-03-03'),
+        ik('https://indiankanoon.org/search/?formInput=bilkis+bano+gang+rape+gujarat+2002&type=0', '2002-03-03'),
       ],
       source_quote: null,
       confidence_score: 0.99,
@@ -415,7 +422,8 @@ export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
       summary: 'Gujarat government grants remission to all 11 convicts on Independence Day under 1992 Remission Policy. All 11 released from Godhra sub-jail, triggering nationwide outrage.',
       court_name: null,
       source_attribution: [
-        wire('https://thewire.in/law/bilkis-bano-case-gujarat-government-remission-11-convicts', '2022-08-15'),
+        ll('https://www.livelaw.in/tags/bilkis-bano-case', '2022-08-15'),
+        bb('https://www.barandbench.com/tag/bilkis-bano', '2022-08-15'),
         toi('https://timesofindia.indiatimes.com/india/bilkis-bano-case-convicts-released/articleshow/93590499.cms', '2022-08-15'),
       ],
       source_quote: null,
@@ -524,7 +532,8 @@ export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
       summary: 'A teenage girl from Unnao district, UP, alleges rape by BJP MLA Kuldeep Singh Sengar at his home in Lucknow. UP Police initially refuses to file FIR due to Sengar\'s political influence.',
       court_name: null,
       source_attribution: [
-        wire('https://thewire.in/law/unnao-rape-case-timeline-kuldeep-singh-sengar', '2017-06-04'),
+        ll('https://www.livelaw.in/tags/unnao-rape-case', '2017-06-04'),
+        ik('https://indiankanoon.org/search/?formInput=kuldeep+singh+sengar+unnao+rape+case&type=0', '2017-06-04'),
       ],
       source_quote: null,
       confidence_score: 0.98,
@@ -626,7 +635,8 @@ export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
       summary: 'A 19-year-old Dalit woman from Hathras, UP, gang-raped and assaulted by 4 upper-caste men. Victim taken to Aligarh Muslim University hospital with critical spinal injuries.',
       court_name: null,
       source_attribution: [
-        wire('https://thewire.in/rights/hathras-gangrape-timeline', '2020-09-14'),
+        ll('https://www.livelaw.in/tags/hathras-case', '2020-09-14'),
+        bb('https://www.barandbench.com/tag/hathras-rape-case', '2020-09-14'),
         ndtv('https://www.ndtv.com/india-news/hathras-gangrape-full-timeline-from-crime-to-now-2303882', '2020-09-14'),
       ],
       source_quote: null,
@@ -643,7 +653,8 @@ export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
       summary: 'Victim dies at Safdarjung Hospital, Delhi. UP Police forcibly cremates her body at 2 AM without family consent at the village, allegedly to destroy evidence. Act condemned by Supreme Court and human rights groups.',
       court_name: null,
       source_attribution: [
-        wire('https://thewire.in/rights/hathras-gangrape-victim-died-cremated-forcibly-at-night', '2020-09-29'),
+        ll('https://www.livelaw.in/tags/hathras-case', '2020-09-29'),
+        bb('https://www.barandbench.com/tag/hathras-rape-case', '2020-09-29'),
         toi('https://timesofindia.indiatimes.com/city/agra/hathras-victim-cremated-at-night-family-alleges-forced-by-up-police/articleshow/78396621.cms', '2020-09-29'),
       ],
       source_quote: 'UP Police forcibly cremated the body at 2 AM without family consent',
@@ -692,7 +703,8 @@ export const LIVE_CASE_EVENTS: Record<string, CaseEvent[]> = {
       summary: 'Trial begins at Hathras fast-track court. All 4 accused plead not guilty. Allahabad High Court monitors proceedings and directs in-camera trial to protect victim\'s family. As of 2023 trial is ongoing.',
       court_name: 'Hathras Fast Track Court / Allahabad HC oversight',
       source_attribution: [
-        wire('https://thewire.in/rights/hathras-case-trial-begins', '2021-03-01'),
+        ll('https://www.livelaw.in/tags/hathras-case', '2021-03-01'),
+        ik('https://indiankanoon.org/search/?formInput=hathras+gang+rape+trial+fast+track+court+2021&type=0', '2021-03-01'),
       ],
       source_quote: null,
       confidence_score: 0.92,
