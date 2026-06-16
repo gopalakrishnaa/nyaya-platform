@@ -170,7 +170,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
   const staticCases: DisplayCase[] = LIVE_CASES_STATIC.map((sc) => ({
     id: sc.id,
     case_ref: sc.case_ref,
-    headline: sc.victim_pseudonym,
+    headline: sc.headline ?? sc.victim_pseudonym,
     crime_category: sc.crime_category,
     status: sc.status,
     incident_date: sc.incident_date,
