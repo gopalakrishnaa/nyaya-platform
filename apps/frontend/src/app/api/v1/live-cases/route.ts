@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     let query = db
       .from('live_cases')
       .select('*', { count: 'exact' })
+      .like('case_ref', 'PRJ-LIVE-%')
       .order('created_at', { ascending: false })
 
     if (state) query = query.ilike('state', `%${state}%`)
