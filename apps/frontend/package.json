@@ -8,7 +8,8 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "ingest": "tsx scripts/ingest.ts"
+    "ingest": "tsx scripts/ingest.ts",
+    "seed:precedents": "tsx scripts/seed-precedents-embeddings.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.82",
