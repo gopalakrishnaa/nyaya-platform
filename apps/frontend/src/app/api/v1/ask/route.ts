@@ -1,17 +1,16 @@
 /**
  * POST /api/v1/ask
  *
- * AI-first case Q&A. Retrieves relevant cases from mock + live registries,
+ * AI-first case Q&A. Retrieves relevant cases from the real-case registry,
  * feeds them to Claude, streams a sourced answer with mandatory citations.
  * Every claim must cite at least one case_ref or the answer is refused.
  */
 import { streamText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest } from 'next/server'
-import { CASES, makeEvents } from '@/lib/mock-data'
-import { LIVE_CASES_STATIC, LIVE_CASE_EVENTS } from '@/lib/live-case-events'
-import { LEGAL_PRECEDENTS } from '@/lib/legal-precedents'
+import { REAL_CASES, getRealCaseDetail } from '@/lib/real-cases'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
+import { searchPrecedents, formatPrecedentsForPrompt } from '@/lib/search-precedents'
 import type { CaseSummary, CaseEvent } from '@/lib/api'
 
 const MAX_QUESTION_LEN = 500
@@ -28,8 +27,7 @@ You answer questions using ONLY the documented case data provided below. Rules:
 2. If the provided cases are insufficient to answer, say so plainly — never guess or use outside knowledge.
 3. Never name or speculate about victims or accused. Use only case references and locations.
 4. Compute statistics (averages, medians, counts) directly from the data. Show the calculation briefly.
-5. Be concise. Lead with the direct answer, then supporting evidence.
-6. Note when data is from demo/synthetic cases vs live documented cases.`
+5. Be concise. Lead with the direct answer, then supporting evidence.`
 
 // Keyword → filter mapping
 const STATE_MAP: Record<string, string> = {
@@ -54,37 +52,14 @@ function extractFilters(q: string): { state?: string; crime?: string; pocso?: bo
   return { state, crime: crime ?? (pocso ? 'POCSO_VIOLATION' : undefined), pocso, conviction }
 }
 
-// Keyword → precedent category mapping
-const PRECEDENT_KEYWORDS: Record<string, string[]> = {
-  SEXUAL_VIOLENCE_CONSENT: ['rape', 'gang rape', 'sexual assault', 'consent', 'corroboration', 'mathura', 'nirbhaya', 'pocso', 'attempt to rape'],
-  DOMESTIC_VIOLENCE_CRUELTY: ['498a', 'domestic', 'cruelty', 'matrimonial', 'stree-dhan', 'streedhan', 'arrest', 'jurisdiction'],
-  DOWRY_DEATH_SUICIDE: ['dowry', '304b', '306', 'abetment', 'suicide', 'soon before', 'presumption'],
-  WORKPLACE_PUBLIC_SPACES: ['workplace', 'posh', 'icc', 'sexual harassment', 'vishaka', 'modesty', 'eve-teasing', 'public space'],
-  CYBER_CRIME_DIGITAL_VIOLENCE: ['cyber', 'online', 'it act', 'morphing', 'deepfake', 'deep fake', 'digital', 'social media', 'obscene', 'blackmail', 'revenge porn', 'non-consensual', 'right to be forgotten'],
-}
 
-function relevantPrecedents(question: string): string {
-  const ql = question.toLowerCase()
-  const matched = LEGAL_PRECEDENTS.filter(p => {
-    const catKeywords = PRECEDENT_KEYWORDS[p.category] ?? []
-    return catKeywords.some(k => ql.includes(k)) ||
-      ql.includes(p.citation.toLowerCase().split(' v.')[0].trim().toLowerCase()) ||
-      ql.includes(p.year.toString())
-  }).slice(0, 8)
-  if (matched.length === 0) return ''
-  return '\n\nRelevant legal precedents:\n' + matched.map(p =>
-    `[${p.citation} ${p.scc_citation ?? p.year}] ${p.key_principle} — ${p.source_url}`
-  ).join('\n')
-}
-
-function formatCase(c: CaseSummary, events: CaseEvent[], isLive: boolean): string {
+function formatCase(c: CaseSummary, events: CaseEvent[]): string {
   const evtLines = events.map(e =>
     `  ${e.event_date ?? '?'} ${e.event_type}${e.court_name ? ` [${e.court_name}]` : ''}`
   ).join('\n')
   return [
     `[${c.case_ref}] ${c.crime_category} | ${c.district}, ${c.state} | ${c.status}`,
     `  incident: ${c.incident_date ?? 'unknown'} | POCSO: ${c.pocso_applicable} | fast-track: ${c.fast_track_court} | convicted: ${c.conviction_achieved}`,
-    `  source: ${isLive ? 'live/documented' : 'demo/synthetic'}`,
     evtLines ? `  timeline:\n${evtLines}` : '',
   ].filter(Boolean).join('\n')
 }
@@ -109,36 +84,30 @@ export async function POST(req: NextRequest) {
 
   const filters = extractFilters(question)
 
-  // Build candidate pool: filter mock + live cases
-  const mockPool = CASES.filter(c => {
+  // Build candidate pool from the real-case registry
+  const pool = REAL_CASES.filter(c => {
     if (filters.state && c.state !== filters.state) return false
     if (filters.crime && c.crime_category !== filters.crime) return false
     if (filters.pocso && !c.pocso_applicable) return false
     if (filters.conviction && !c.conviction_achieved) return false
     return true
-  }).slice(0, 30)
-
-  const livePool = LIVE_CASES_STATIC.filter(c => {
-    if (filters.state && c.state !== filters.state) return false
-    if (filters.crime && c.crime_category !== filters.crime) return false
-    return true
-  })
+  }).slice(0, 50)
 
   // If no filter matched, take a diverse sample
-  const mockFinal = mockPool.length > 0 ? mockPool : CASES.slice(0, 20)
-  const caseDocs = [
-    ...livePool.map(c => formatCase(c, LIVE_CASE_EVENTS[c.id] ?? [], true)),
-    ...mockFinal.map(c => formatCase(c, makeEvents(c), false)),
-  ].join('\n\n')
+  const finalPool = pool.length > 0 ? pool : REAL_CASES.slice(0, 30)
+  const caseDocs = finalPool
+    .map(c => formatCase(c, getRealCaseDetail(c.id)?.events ?? []))
+    .join('\n\n')
 
   try {
+    const precedents = await searchPrecedents(question, 8)
     const result = streamText({
       model: anthropic('claude-3-5-haiku-20241022'),
       system: SYSTEM_PROMPT,
       messages: [
         {
           role: 'user' as const,
-          content: `Documented cases (${livePool.length} live, ${mockFinal.length} demo):\n\n${caseDocs}${relevantPrecedents(question)}\n\nQuestion: ${question}`,
+          content: `Documented cases (${finalPool.length}):\n\n${caseDocs}${formatPrecedentsForPrompt(precedents)}\n\nQuestion: ${question}`,
         },
       ],
       maxOutputTokens: 1024,

@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
 import { generateObject } from 'ai';
-import { google } from '@ai-sdk/google';
+import { anthropic } from '@ai-sdk/anthropic';
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -56,12 +56,13 @@ const EventType = z.enum([
 
 const ExtractionSchema = z.object({
   is_relevant: z.boolean().describe('True if the article describes a specific real-world gender-based violence case in India.'),
-  case_ref: z.string().describe('A unique generated reference like IN-DL-2024-001 based on state and year.'),
+  case_ref: z.string().describe('A unique generated reference like PRJ-LIVE-DL-2024-0001 based on state code and year. MUST start with PRJ-LIVE-.'),
   victim_pseudonym: z.string().describe('A respectful pseudonym for the victim (e.g. VICTIM-DELHI-24). Never use real names.'),
   crime_category: CrimeCategory,
   status: CaseStatus,
   incident_date: z.string().optional().describe('YYYY-MM-DD format if known'),
-  state: z.string().describe('2-letter state code, e.g., MH, DL, UP'),
+  state: z.string().describe('Full state name, e.g., Maharashtra, Delhi, Uttar Pradesh'),
+  headline: z.string().describe('One-line factual summary of the case suitable for public display. No victim names.'),
   district: z.string().describe('City or district name'),
   court_name: z.string().optional(),
   pocso_applicable: z.boolean(),
@@ -97,7 +98,7 @@ async function processArticle(item: any) {
   console.log('Extracting structured data using Claude...');
   try {
     const { object: extracted } = await generateObject({
-      model: google('gemini-2.0-flash-exp'),
+      model: anthropic('claude-haiku-4-5-20251001'),
       schema: ExtractionSchema,
       prompt: `Analyze the following news article and extract details about the legal case related to gender-based violence in India. If it's not a specific case (e.g., general statistics, opinion piece), set is_relevant to false.\n\nArticle Title: ${item.title}\n\nArticle Text:\n${content}`
     });
@@ -107,81 +108,76 @@ async function processArticle(item: any) {
       return;
     }
 
-    console.log(`Extracted Case: ${extracted.case_ref}`);
+    // The UI only shows cases whose case_ref starts with PRJ-LIVE-
+    const caseRef = extracted.case_ref.startsWith('PRJ-LIVE-')
+      ? extracted.case_ref
+      : `PRJ-LIVE-${extracted.case_ref.replace(/^(IN|PRJ)-/, '')}`;
 
-    // Insert into Supabase
-    // 1. Insert Case
-    const { data: caseData, error: caseError } = await supabase
-      .from('cases')
+    console.log(`Extracted Case: ${caseRef}`);
+
+    const { error: caseError } = await supabase
+      .from('live_cases')
       .upsert({
-        case_ref: extracted.case_ref,
-        victim_pseudonym: extracted.victim_pseudonym,
+        id: caseRef.toLowerCase(),
+        case_ref: caseRef,
         crime_category: extracted.crime_category,
         status: extracted.status,
         incident_date: extracted.incident_date || null,
         state: extracted.state,
         district: extracted.district,
-        court_name: extracted.court_name || null,
-        pocso_applicable: extracted.pocso_applicable
-      }, { onConflict: 'case_ref' })
-      .select('id')
-      .single();
+        pocso_applicable: extracted.pocso_applicable,
+        conviction_achieved: extracted.status === 'CLOSED_CONVICTED',
+        headline: extracted.headline,
+        source_url: item.link,
+        source_title: item.title,
+      }, { onConflict: 'case_ref' });
 
     if (caseError) {
       console.error('Error inserting case:', caseError);
       return;
     }
-
-    // 2. Insert Events
-    if (extracted.events && extracted.events.length > 0) {
-      const eventsToInsert = extracted.events.map(e => ({
-        case_id: caseData.id,
-        event_date: e.event_date || new Date().toISOString().split('T')[0],
-        event_category: e.event_category,
-        event_type: e.event_type,
-        summary: e.event_description,
-        source_attribution: [{ url: item.link }]
-      }));
-
-      const { error: eventError } = await supabase
-        .from('case_events')
-        .insert(eventsToInsert);
-
-      if (eventError) {
-        console.error('Error inserting events:', eventError);
-      } else {
-        console.log(`Successfully ingested case and ${eventsToInsert.length} events!`);
-      }
-    }
+    console.log('Successfully ingested case!');
   } catch (error) {
     console.error('Extraction failed:', error);
   }
 }
 
+const FEED_URLS = [
+  'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms',            // TOI India News
+  'https://feeds.feedburner.com/ndtvnews-india-news',                        // NDTV India
+  'https://www.thehindu.com/news/national/feeder/default.rss',               // The Hindu National
+  'https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml',         // Hindustan Times India
+  'https://indianexpress.com/section/india/feed/',                           // Indian Express India
+];
+
+const MAX_PER_RUN = 15; // across all feeds, for cost/rate limiting
+
 async function runIngestion() {
   console.log('Starting automated ingestion run...');
-  const feedUrl = 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms'; // TOI India News
-  
-  try {
-    const feed = await parser.parseURL(feedUrl);
-    console.log(`Fetched ${feed.items.length} items from ${feed.title}`);
+  let processedCount = 0;
 
-    let processedCount = 0;
-    for (const item of feed.items) {
-      if (processedCount >= 5) break; // Limit to 5 per run for cost/rate limiting
+  for (const feedUrl of FEED_URLS) {
+    if (processedCount >= MAX_PER_RUN) break;
+    try {
+      const feed = await parser.parseURL(feedUrl);
+      console.log(`Fetched ${feed.items.length} items from ${feed.title}`);
 
-      const textToSearch = (item.title + ' ' + (item.contentSnippet || '')).toLowerCase();
-      const isMatch = KEYWORDS.some(kw => textToSearch.includes(kw));
+      for (const item of feed.items) {
+        if (processedCount >= MAX_PER_RUN) break;
 
-      if (isMatch) {
-        await processArticle(item);
-        processedCount++;
+        const textToSearch = (item.title + ' ' + (item.contentSnippet || '')).toLowerCase();
+        const isMatch = KEYWORDS.some(kw => textToSearch.includes(kw));
+
+        if (isMatch) {
+          await processArticle(item);
+          processedCount++;
+        }
       }
+    } catch (err) {
+      console.error(`Failed to fetch RSS ${feedUrl}:`, err);
     }
-    console.log('Ingestion run complete!');
-  } catch (err) {
-    console.error('Failed to fetch RSS:', err);
   }
+  console.log(`Ingestion run complete! Processed ${processedCount} articles.`);
 }
 
 runIngestion();

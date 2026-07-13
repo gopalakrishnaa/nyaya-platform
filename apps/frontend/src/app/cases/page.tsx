@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { fuzzyMatch } from '@/lib/fuzzy'
-import { LIVE_CASE_EVENTS, LIVE_CASES_STATIC } from '@/lib/live-case-events'
+import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
+import { REAL_CASES } from '@/lib/real-cases'
 
 export const dynamic = 'force-dynamic'
 
@@ -122,8 +123,8 @@ export default async function CasesPage({ searchParams }: PageProps) {
 
   const liveCases = await fetchLiveCases(q)
 
-  // Build static-registry cases (always present, no Supabase needed)
-  const staticCases: DisplayCase[] = LIVE_CASES_STATIC.map((sc) => ({
+  // Build registry cases (curated + ingested; always present, no Supabase needed)
+  const staticCases: DisplayCase[] = REAL_CASES.map((sc) => ({
     id: sc.id,
     case_ref: sc.case_ref,
     headline: sc.headline ?? sc.victim_pseudonym,
@@ -139,7 +140,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
     conviction_achieved: sc.conviction_achieved,
     overall_confidence: sc.overall_confidence,
     last_event_at: sc.last_event_at,
-    event_count: LIVE_CASE_EVENTS[sc.id]?.length ?? sc.event_count,
+    event_count: LIVE_CASE_EVENTS[sc.id]?.length ?? (sc.events.length || sc.event_count),
     is_live: true,
   }))
 

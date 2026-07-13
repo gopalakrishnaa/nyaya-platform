@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getCaseDetail } from '@/lib/mock-data'
+import { getRealCaseDetail } from '@/lib/real-cases'
 import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
-import { LIVE_CASE_EVENTS, LIVE_CASES_STATIC } from '@/lib/live-case-events'
+import { LIVE_CASE_EVENTS } from '@/lib/live-case-events'
 import type { CaseEvent, TimelineGap, CaseDetail } from '@/lib/api'
 import { StageProgressBar } from '@/components/StageProgressBar'
 import { GapAlert } from '@/components/GapAlert'
@@ -60,16 +60,10 @@ interface PageProps {
   params: { id: string }
 }
 
-function getStaticCase(id: string): CaseDetail | null {
-  const sc = LIVE_CASES_STATIC.find((c) => c.id === id)
-  if (!sc) return null
-  return { ...sc, events: LIVE_CASE_EVENTS[id] ?? [] }
-}
-
 async function getLiveCase(id: string): Promise<CaseDetail | null> {
-  // Check static registry first — no Supabase needed
-  const staticCase = getStaticCase(id)
-  if (staticCase) return staticCase
+  // Check real-case registry first — no Supabase needed
+  const registryCase = getRealCaseDetail(id)
+  if (registryCase) return registryCase
 
   if (!isSupabaseConfigured()) return null
   try {
@@ -108,7 +102,7 @@ async function getLiveCase(id: string): Promise<CaseDetail | null> {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const c = getCaseDetail(params.id) ?? await getLiveCase(params.id)
+  const c = await getLiveCase(params.id)
   if (!c) return { title: 'Case Detail' }
   return {
     title: `${c.case_ref} — ${CATEGORY_LABELS[c.crime_category] ?? c.crime_category}`,
@@ -117,11 +111,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function CaseDetailPage({ params }: PageProps) {
-  const raw = getCaseDetail(params.id) ?? await getLiveCase(params.id)
+  const raw = await getLiveCase(params.id)
   if (!raw) notFound()
   const c = raw as NonNullable<typeof raw>
 
-  const isMock = params.id.startsWith('case-')
   const currentStage = CURRENT_STAGE_MAP[c.status] ?? 'FIR'
   const statusColor = STATUS_COLORS[c.status] ?? 'bg-gray-100 text-gray-700'
 
@@ -143,18 +136,6 @@ export default async function CaseDetailPage({ params }: PageProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Demo data notice */}
-      {isMock && (
-        <div className="mb-6 flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-          <span className="text-lg leading-none">🧪</span>
-          <div>
-            <strong>Demo case — synthetic data only.</strong> This case and its timeline events are
-            procedurally generated for demonstration purposes. Names, dates, and court details are
-            fictional. No real news sources exist for these events.
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 flex-wrap mb-3">

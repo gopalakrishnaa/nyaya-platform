@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { CASES } from '@/lib/mock-data'
+import { REAL_CASES } from '@/lib/real-cases'
 import { fuzzyMatch } from '@/lib/fuzzy'
 
 export const runtime = 'nodejs'
@@ -18,7 +18,7 @@ export function GET(req: NextRequest) {
   const year = s.get('year')
   const q = s.get('q')
 
-  let items = [...CASES]
+  let items = [...REAL_CASES]
 
   if (state) items = items.filter(c => fuzzyMatch(state, c.state))
   if (crimeCategory) items = items.filter(c => c.crime_category === crimeCategory)

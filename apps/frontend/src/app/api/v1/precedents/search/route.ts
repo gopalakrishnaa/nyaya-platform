@@ -41,7 +41,7 @@ function rrfFuse(
     if (!data.has(row.id)) data.set(row.id, row as Record<string, unknown>)
   })
 
-  return [...scores.entries()]
+  return Array.from(scores.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([id, rrf_score]) => ({ ...data.get(id)!, id, rrf_score }))
@@ -116,12 +116,12 @@ export async function GET(req: NextRequest) {
 
   if (mode === 'semantic') {
     results = semanticResults.slice(0, limit).map((r, rank) => ({
-      ...r,
+      ...(r as { id: string; [k: string]: unknown }),
       rrf_score: 1 / (RRF_K + rank + 1),
     }))
   } else if (mode === 'keyword') {
     results = keywordResults.slice(0, limit).map((r, rank) => ({
-      ...r,
+      ...(r as { id: string; [k: string]: unknown }),
       rrf_score: 1 / (RRF_K + rank + 1),
     }))
   } else {
