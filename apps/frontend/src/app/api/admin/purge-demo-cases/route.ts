@@ -2,8 +2,8 @@
  * DELETE /api/admin/purge-demo-cases
  *
  * Removes demo/synthetic cases from live_cases where case_ref does NOT
- * start with 'PRJ-LIVE-'. Real cases use 'PRJ-LIVE-' prefix; demo cases
- * from mock-data.ts use patterns like 'PRJ-2024-MH-000042'.
+ * start with 'PRJ-LIVE-'. Real cases use 'PRJ-LIVE-' prefix; legacy demo
+ * rows use patterns like 'PRJ-2024-MH-000042'.
  * Safe to call multiple times (idempotent).
  */
 import { NextResponse } from 'next/server'

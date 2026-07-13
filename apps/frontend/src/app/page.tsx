@@ -1,10 +1,9 @@
 import Link from 'next/link'
-import { CASES } from '@/lib/mock-data'
-import { LIVE_CASES_STATIC } from '@/lib/live-case-events'
+import { REAL_CASES } from '@/lib/real-cases'
 import type { PlatformStats } from '@/lib/api'
 
 function getStats(): PlatformStats {
-  const all = [...CASES, ...LIVE_CASES_STATIC]
+  const all = REAL_CASES
   const convictions = all.filter(c => c.conviction_achieved).length
   const states = new Set(all.map(c => c.state)).size
   const pocso = all.filter(c => c.pocso_applicable).length
@@ -20,30 +19,17 @@ function getStats(): PlatformStats {
 }
 
 function getRecentCases() {
-  const allCases = [
-    ...LIVE_CASES_STATIC.map(c => ({
-      id: c.id,
-      case_ref: c.case_ref,
-      crime_category: c.crime_category,
-      status: c.status,
-      state: c.state,
-      district: c.district,
-      pocso_applicable: c.pocso_applicable,
-      last_event_at: c.last_event_at,
-      is_live: true,
-    })),
-    ...CASES.map(c => ({
-      id: c.id,
-      case_ref: c.case_ref,
-      crime_category: c.crime_category,
-      status: c.status,
-      state: c.state,
-      district: c.district,
-      pocso_applicable: c.pocso_applicable,
-      last_event_at: c.last_event_at ?? null,
-      is_live: false,
-    })),
-  ]
+  const allCases = REAL_CASES.map(c => ({
+    id: c.id,
+    case_ref: c.case_ref,
+    crime_category: c.crime_category,
+    status: c.status,
+    state: c.state,
+    district: c.district,
+    pocso_applicable: c.pocso_applicable,
+    last_event_at: c.last_event_at ?? null,
+    is_live: true,
+  }))
   return allCases
     .sort((a, b) => (b.last_event_at ?? '').localeCompare(a.last_event_at ?? ''))
     .slice(0, 5)
