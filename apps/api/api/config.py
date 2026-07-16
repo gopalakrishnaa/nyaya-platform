@@ -36,5 +36,9 @@ class Settings(BaseSettings):
 
     privacy_salt: str = "default-dev-salt-change-in-production"
 
+    posthog_project_token: str = ""
+    posthog_host: str = "https://us.i.posthog.com"
+    posthog_disabled: bool = False
+
 
 settings = Settings()  # type: ignore[call-arg]

@@ -10,3 +10,6 @@ data:
   REDIS_URL: "redis://redis:6379/0"
   LOG_LEVEL: "INFO"
   PYTHONUNBUFFERED: "1"
+  POSTHOG_PROJECT_TOKEN: "phc_tYcZwP8kPXs7pM8PLJf8Z7afAue27f33MBN8iidUxgoD"
+  POSTHOG_HOST: "https://us.i.posthog.com"
+  POSTHOG_DISABLED: "false"

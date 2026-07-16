@@ -11,6 +11,7 @@ from ..database import get_db
 from ..middleware.auth import require_admin
 from ..middleware.rate_limit import rate_limit
 from ..config import settings
+from ..posthog_client import posthog_client
 
 router = APIRouter(prefix="/v1/admin", tags=["admin"])
 
@@ -91,6 +92,17 @@ async def create_source(
     )
     new_id = result.scalar()
     await db.commit()
+    if posthog_client is not None:
+        posthog_client.capture(
+            user.get("sub", "unknown"),
+            "source_created",
+            {
+                "source_type": body.source_type,
+                "trust_score": body.trust_score,
+                "language_count": len(body.language_codes),
+                "admin_role": user.get("role"),
+            },
+        )
     return {"id": str(new_id), "source_code": body.source_code}
 
 
@@ -117,6 +129,15 @@ async def suppress_case(
         {"reason": body.reason, "actor": user.get("sub"), "id": case_id},
     )
     await db.commit()
+    if posthog_client is not None:
+        posthog_client.capture(
+            user.get("sub", "unknown"),
+            "case_suppressed",
+            {
+                "case_id": case_id,
+                "admin_role": user.get("role"),
+            },
+        )
     return {"status": "suppressed", "case_id": case_id}
 
 
@@ -222,6 +243,16 @@ async def create_erasure_request(
         },
     )
     await db.commit()
+    if posthog_client is not None:
+        posthog_client.capture(
+            user.get("sub", "unknown"),
+            "erasure_request_created",
+            {
+                "case_id": body.case_id,
+                "legal_basis": body.legal_basis,
+                "admin_role": user.get("role"),
+            },
+        )
     return {
         "status": "accepted",
         "case_id": body.case_id,

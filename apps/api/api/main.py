@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
@@ -9,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .middleware.audit import AuditMiddleware
 from .middleware.request_id import RequestIDMiddleware
+from .posthog_client import init_posthog, shutdown_posthog
 from .routers import admin, ask, cases, export, health, moderation, search, stats
 
 
@@ -29,7 +31,16 @@ def configure_logging() -> None:
 
 configure_logging()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
+    init_posthog()
+    yield
+    shutdown_posthog()
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Nyaya API",
     description=(
         "Justice transparency platform API — tracking crimes against women "

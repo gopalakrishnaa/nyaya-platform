@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..middleware.auth import get_api_key_user
+from ..posthog_client import posthog_client
 
 router = APIRouter(prefix="/v1/export", tags=["export"])
 
@@ -32,6 +33,22 @@ async def export_cases(
 ) -> StreamingResponse:
     if not api_user:
         raise HTTPException(status_code=401, detail="API key required for bulk export")
+
+    if posthog_client is not None:
+        posthog_client.capture(
+            api_user["id"],
+            "data_exported",
+            {
+                "format": format,
+                "limit": limit,
+                "has_state_filter": state is not None,
+                "has_crime_category_filter": crime_category is not None,
+                "has_year_filter": year is not None,
+                "has_status_filter": status is not None,
+                "has_pocso_filter": pocso is not None,
+                "api_key_tier": api_user.get("tier"),
+            },
+        )
 
     conditions = ["is_suppressed = FALSE"]
     params: dict[str, Any] = {"limit": min(limit, MAX_EXPORT_RECORDS)}

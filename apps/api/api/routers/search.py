@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 from ..database import get_db
 from ..middleware.rate_limit import rate_limit
+from ..posthog_client import posthog_client
 from ..services.search_service import SearchService
 
 router = APIRouter(prefix="/v1/search", tags=["search"])
@@ -57,9 +58,30 @@ async def search(
     )
 
     hits = results.get("hits", {})
+    result_count = hits.get("total", {}).get("value", 0)
+    if posthog_client is not None:
+        posthog_client.capture(
+            "anonymous",
+            "case_searched",
+            {
+                "has_query": q is not None,
+                "query_length": len(q) if q else 0,
+                "filter_count": len(filters),
+                "result_count": result_count,
+                "page": page,
+                "page_size": page_size,
+                "has_state_filter": state is not None,
+                "has_crime_category_filter": crime_category is not None,
+                "has_year_filter": year is not None,
+                "has_status_filter": status is not None,
+                "has_pocso_filter": pocso is not None,
+                "has_fast_track_filter": fast_track is not None,
+                "has_conviction_filter": conviction is not None,
+            },
+        )
     return {
         "items": [h["_source"] for h in hits.get("hits", [])],
-        "total": hits.get("total", {}).get("value", 0),
+        "total": result_count,
         "page": page,
         "page_size": page_size,
         "aggregations": results.get("aggregations", {}),
