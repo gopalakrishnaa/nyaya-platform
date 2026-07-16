@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 from ..database import get_db
 from ..middleware.rate_limit import rate_limit
+from ..posthog_client import posthog_client
 from ..services.case_service import CaseService
 
 router = APIRouter(prefix="/v1/cases", tags=["cases"])
@@ -84,7 +85,7 @@ async def list_cases(
 ) -> CaseListResponse:
     await rate_limit(request, settings.api_rate_limit_public)
     svc = CaseService(db)
-    return await svc.list_cases(
+    result = await svc.list_cases(
         page=page,
         page_size=page_size,
         state=state,
@@ -98,6 +99,25 @@ async def list_cases(
         ipc_section=ipc_section,
         sort=sort,
     )
+    if posthog_client is not None:
+        filters_applied = {k: v for k, v in {
+            "state": state, "district": district, "crime_category": crime_category,
+            "status": status, "pocso": pocso, "fast_track": fast_track,
+            "year": year, "conviction": conviction, "ipc_section": ipc_section,
+        }.items() if v is not None}
+        posthog_client.capture(
+            "anonymous",
+            "cases_browsed",
+            {
+                "page": page,
+                "page_size": page_size,
+                "sort": sort,
+                "filter_count": len(filters_applied),
+                "has_filters": bool(filters_applied),
+                "result_count": result.total,
+            },
+        )
+    return result
 
 
 @router.get("/{case_id}", response_model=dict[str, Any])
@@ -111,6 +131,20 @@ async def get_case(
     case = await svc.get_case_with_timeline(case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
+    if posthog_client is not None:
+        posthog_client.capture(
+            "anonymous",
+            "case_viewed",
+            {
+                "case_id": case_id,
+                "crime_category": case.get("crime_category"),
+                "state": case.get("state"),
+                "status": case.get("status"),
+                "pocso_applicable": case.get("pocso_applicable"),
+                "fast_track_court": case.get("fast_track_court"),
+                "conviction_achieved": case.get("conviction_achieved"),
+            },
+        )
     return case
 
 
@@ -125,6 +159,12 @@ async def get_case_timeline(
     timeline = await svc.get_timeline(case_id)
     if not timeline:
         raise HTTPException(status_code=404, detail="Case not found")
+    if posthog_client is not None:
+        posthog_client.capture(
+            "anonymous",
+            "case_timeline_viewed",
+            {"case_id": case_id},
+        )
     return timeline
 
 
@@ -137,4 +177,11 @@ async def get_case_events(
 ) -> list[EventResponse]:
     await rate_limit(request, settings.api_rate_limit_public)
     svc = CaseService(db)
-    return await svc.get_events(case_id, category)
+    events = await svc.get_events(case_id, category)
+    if posthog_client is not None:
+        posthog_client.capture(
+            "anonymous",
+            "case_events_viewed",
+            {"case_id": case_id, "category_filter": category, "event_count": len(events)},
+        )
+    return events

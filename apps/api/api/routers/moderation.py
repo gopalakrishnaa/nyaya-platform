@@ -11,6 +11,7 @@ from ..database import get_db
 from ..middleware.auth import require_moderator
 from ..middleware.rate_limit import rate_limit
 from ..config import settings
+from ..posthog_client import posthog_client
 
 router = APIRouter(prefix="/v1/moderation", tags=["moderation"])
 
@@ -133,6 +134,17 @@ async def approve_queue_item(
         {"id": queue_id},
     )
     await db.commit()
+    if posthog_client is not None:
+        posthog_client.capture(
+            user.get("sub", "unknown"),
+            "moderation_approved",
+            {
+                "queue_id": queue_id,
+                "moderator_role": user.get("role"),
+                "has_corrections": body.corrections is not None,
+                "has_notes": body.notes is not None,
+            },
+        )
     return {"status": "approved", "queue_id": queue_id}
 
 
@@ -173,4 +185,13 @@ async def reject_queue_item(
         {"id": queue_id},
     )
     await db.commit()
+    if posthog_client is not None:
+        posthog_client.capture(
+            user.get("sub", "unknown"),
+            "moderation_rejected",
+            {
+                "queue_id": queue_id,
+                "moderator_role": user.get("role"),
+            },
+        )
     return {"status": "rejected", "queue_id": queue_id, "reason": body.reason}
