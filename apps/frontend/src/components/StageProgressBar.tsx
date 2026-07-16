@@ -11,7 +11,7 @@ const STAGES = [
 interface Props {
   currentStage: string
   status: string
-  /** Stage keys that have at least one event — clicking label scrolls to #stage-KEY */
+  /** Stage keys that have at least one event: clicking label scrolls to #stage-KEY */
   linkedStages?: Set<string>
 }
 

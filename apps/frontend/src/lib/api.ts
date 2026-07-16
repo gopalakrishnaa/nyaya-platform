@@ -1,6 +1,6 @@
 /**
- * API client — calls Next.js API routes (/api/v1/...) which serve mock data.
- * Works identically in local dev and on Vercel — no external services needed.
+ * API client: calls Next.js API routes (/api/v1/...) which serve mock data.
+ * Works identically in local dev and on Vercel: no external services needed.
  */
 
 export interface CaseSummary {

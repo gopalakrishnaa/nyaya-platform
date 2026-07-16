@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
     })
 
     if (error) {
-      // Trigram search is optional — degrade gracefully
+      // Trigram search is optional: degrade gracefully
       console.warn('keyword_search_precedents failed:', error.message)
     } else {
       keywordResults = data ?? []

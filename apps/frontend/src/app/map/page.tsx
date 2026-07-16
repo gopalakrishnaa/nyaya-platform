@@ -38,7 +38,7 @@ export default async function MapPage() {
         </p>
       </div>
 
-      {/* Static choropleth fallback — full JS map would be a client component with Leaflet */}
+      {/* Static choropleth fallback: full JS map would be a client component with Leaflet */}
       <div className="grid grid-cols-1 gap-4">
         {/* Summary table as accessible fallback */}
         <section className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -85,7 +85,7 @@ export default async function MapPage() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right tabular-nums text-gray-600 hidden sm:table-cell">
-                      {s.avg_delay_days !== null ? Math.round(s.avg_delay_days) : '—'}
+                      {s.avg_delay_days !== null ? Math.round(s.avg_delay_days) : 'N/A'}
                     </td>
                     <td className="px-4 py-2.5 hidden md:table-cell">
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">

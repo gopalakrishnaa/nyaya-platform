@@ -66,8 +66,8 @@ export async function GET(
     const rows = extracted.map((c, i) => buildLiveCase(state, c, stateRunId, i))
 
     if (rows.length > 0) {
-      // Upsert — dedup by case_ref (state + sequential index per run)
-      // For true dedup use source_url — but Google News URLs change on re-fetch
+      // Upsert: dedup by case_ref (state + sequential index per run)
+      // For true dedup use source_url: but Google News URLs change on re-fetch
       const { error } = await db
         .from('live_cases')
         .upsert(rows, { onConflict: 'case_ref', ignoreDuplicates: false })

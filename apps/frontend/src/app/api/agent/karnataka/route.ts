@@ -1,10 +1,10 @@
 /**
- * Karnataka AI Agent — Prajna data pipeline (Guidelines §4.2)
+ * Karnataka AI Agent: Prajna data pipeline (Guidelines §4.2)
  *
  * Pipeline:
- * 1. INGEST  — fetch Google News RSS for Karnataka crime cases (simulates ANI/PTI feeds)
- * 2. EXTRACT — Claude parses articles → structured case objects (IPC sections, dates, districts)
- * 3. RESPOND — return CaseSummary-compatible JSON
+ * 1. INGEST : fetch Google News RSS for Karnataka crime cases (simulates ANI/PTI feeds)
+ * 2. EXTRACT: Claude parses articles → structured case objects (IPC sections, dates, districts)
+ * 3. RESPOND: return CaseSummary-compatible JSON
  *
  * Requires: GOOGLE_GENERATIVE_AI_API_KEY env var set in Vercel project settings.
  */
@@ -157,9 +157,9 @@ export async function GET(req: NextRequest) {
     const { object } = await generateObject({
       model: google('gemini-flash-latest'),
       schema: ExtractedCaseSchema,
-      system: `You are a legal data extraction agent for the Prajna platform — an open-source justice transparency system tracking crimes against women in India (nyayaplatform.vercel.app).
+      system: `You are a legal data extraction agent for the Prajna platform: an open-source justice transparency system tracking crimes against women in India (nyayaplatform.vercel.app).
 
-Your role follows Prajna Guidelines §4.2 — AI Extraction:
+Your role follows Prajna Guidelines §4.2: AI Extraction:
 - Extract ONLY factual information explicitly stated in the article
 - NEVER infer, embellish, or guess details not mentioned
 - Protect victim privacy: never include names, use district-level location only

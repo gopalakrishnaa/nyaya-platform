@@ -1,6 +1,6 @@
 /**
  * Server-side Supabase client using service role key.
- * Used ONLY in API routes — never exposed to browser.
+ * Used ONLY in API routes: never exposed to browser.
  * Bypasses RLS for agent writes.
  */
 import { createClient } from '@supabase/supabase-js'

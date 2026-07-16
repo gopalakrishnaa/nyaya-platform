@@ -4,7 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'About & Methodology',
   description:
-    'How Prajna tracks crimes against women through India\'s legal system — sources, methodology, and privacy protections.',
+    'How Prajna tracks crimes against women through India\'s legal system: sources, methodology, and privacy protections.',
 }
 
 export default function AboutPage() {
@@ -32,25 +32,25 @@ export default function AboutPage() {
       <Section title="Data Sources">
         <ul>
           <li>
-            <strong>ANI / PTI</strong> — newswire RSS feeds, English
+            <strong>ANI / PTI</strong>: newswire RSS feeds, English
           </li>
           <li>
-            <strong>Dainik Bhaskar</strong> — Hindi regional press
+            <strong>Dainik Bhaskar</strong>: Hindi regional press
           </li>
           <li>
-            <strong>Mathrubhumi</strong> — Malayalam press
+            <strong>Mathrubhumi</strong>: Malayalam press
           </li>
           <li>
-            <strong>Ananda Bazar Patrika</strong> — Bengali press
+            <strong>Ananda Bazar Patrika</strong>: Bengali press
           </li>
           <li>
-            <strong>eCourts API</strong> — official court order data
+            <strong>eCourts API</strong>: official court order data
           </li>
           <li>
-            <strong>NCRB</strong> — National Crime Records Bureau annual Excel/PDF reports
+            <strong>NCRB</strong>: National Crime Records Bureau annual Excel/PDF reports
           </li>
           <li>
-            <strong>RTI responses</strong> — scanned PDF uploads processed via OCR
+            <strong>RTI responses</strong>: scanned PDF uploads processed via OCR
           </li>
         </ul>
         <p>
@@ -65,22 +65,22 @@ export default function AboutPage() {
         </p>
         <ol>
           <li>
-            <strong>Privacy Engine</strong> — Detects and redacts names, ages under 18, phone
+            <strong>Privacy Engine</strong>: Detects and redacts names, ages under 18, phone
             numbers, email addresses, and precise addresses. Minor detection triggers full
             suppression per POCSO guidelines.
           </li>
           <li>
-            <strong>AI Extractor</strong> — A large language model (claude-sonnet-4-6) extracts
+            <strong>AI Extractor</strong>: A large language model (claude-sonnet-4-6) extracts
             structured events at temperature&nbsp;0. Every event requires a verbatim
             &ldquo;source quote&rdquo; from the original text to prevent hallucination.
           </li>
           <li>
-            <strong>Entity Resolver</strong> — Links new events to existing cases using FIR
+            <strong>Entity Resolver</strong>: Links new events to existing cases using FIR
             number matching, court record matching, and multilingual sentence-embedding similarity.
             Ambiguous matches go to human review.
           </li>
           <li>
-            <strong>Timeline Engine</strong> — Places each event into one of seven legal stages
+            <strong>Timeline Engine</strong>: Places each event into one of seven legal stages
             (FIR → Investigation → Chargesheet → Trial → Judgment → Appeal → Closure) and flags
             statutory deadline breaches.
           </li>

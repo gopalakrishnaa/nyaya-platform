@@ -1,5 +1,5 @@
 /**
- * Prajna AI Extraction Pipeline — Guidelines §4.2
+ * Prajna AI Extraction Pipeline: Guidelines §4.2
  *
  * Ingest → Extract → Store
  * Google News RSS  →  Google Gemini Flash  →  Supabase live_cases
@@ -131,9 +131,9 @@ export async function extractCases(state: string, articles: NewsItem[]): Promise
   const { object } = await generateObject({
     model: google('gemini-flash-latest'),
     schema: ExtractedCaseSchema,
-    system: `You are a legal data extraction agent for the Prajna platform — tracking crimes against women in India.
+    system: `You are a legal data extraction agent for the Prajna platform: tracking crimes against women in India.
 
-Prajna Guidelines §4.2 — Extraction rules:
+Prajna Guidelines §4.2: Extraction rules:
 - Extract ONLY facts explicitly stated in the article. Never infer or guess.
 - Protect victim privacy: never include real names. Use district-level location only.
 - IPC sections: include ONLY when explicitly named (376=rape, 354=assault, 498A=domestic violence, 302=murder, 304B=dowry death, 366=abduction, 363=kidnapping, POCSO Act)
@@ -161,7 +161,7 @@ export interface LiveCase extends ExtractedCase {
   created_at: string
 }
 
-/** Normalize incident_date — DB expects DATE (YYYY-MM-DD) or null */
+/** Normalize incident_date: DB expects DATE (YYYY-MM-DD) or null */
 function sanitizeDate(d: string | null): string | null {
   if (!d) return null
   // Full ISO date already

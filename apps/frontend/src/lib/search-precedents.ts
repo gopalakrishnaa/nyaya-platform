@@ -135,6 +135,6 @@ export async function searchPrecedents(
 export function formatPrecedentsForPrompt(precedents: PrecedentResult[]): string {
   if (precedents.length === 0) return ''
   return '\n\nRelevant legal precedents:\n' + precedents.map(p =>
-    `[${p.citation}${p.scc_citation ? ` ${p.scc_citation}` : ` ${p.year}`}] ${p.key_principle}${p.source_url ? ` — ${p.source_url}` : ''}`
+    `[${p.citation}${p.scc_citation ? ` ${p.scc_citation}` : ` ${p.year}`}] ${p.key_principle}${p.source_url ? `: ${p.source_url}` : ''}`
   ).join('\n')
 }
