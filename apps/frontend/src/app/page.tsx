@@ -50,13 +50,13 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="text-center py-16 border-b border-gray-200 mb-12">
-        <h1 className="text-4xl font-bold text-prajna-navy mb-4">
-          न्याय — Justice Transparency
+      <section className="text-center py-16 px-6 mb-12 rounded-2xl bg-prajna-ink">
+        <h1 className="text-4xl font-bold text-prajna-paper mb-4">
+          न्याय: Justice Transparency
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-          Tracking crimes against women through India&apos;s legal system — from FIR to conviction.
-          Every case, every delay, every outcome — publicly documented.
+        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+          Tracking crimes against women through India&apos;s legal system: from FIR to conviction.
+          Every case, every delay, every outcome: publicly documented.
         </p>
         <form action="/cases" method="GET" className="max-w-xl mx-auto">
           <div className="flex gap-2">
@@ -64,12 +64,12 @@ export default function HomePage() {
               type="search"
               name="q"
               placeholder="Search cases by state, crime type, court..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-prajna-navy text-base"
+              className="flex-1 px-4 py-3 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-prajna-saffron text-base"
               aria-label="Search cases"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-prajna-navy text-white rounded-lg font-medium hover:bg-prajna-navy/90"
+              className="px-6 py-3 bg-prajna-saffron text-prajna-ink rounded-lg font-semibold hover:bg-prajna-saffron/90"
             >
               Search
             </button>
@@ -91,7 +91,7 @@ export default function HomePage() {
       <section>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-prajna-navy">Recent Case Updates</h2>
-          <Link href="/cases" className="text-sm text-prajna-navy underline">
+          <Link href="/cases" className="text-sm text-prajna-crimson underline">
             View all cases →
           </Link>
         </div>
@@ -100,7 +100,7 @@ export default function HomePage() {
             <li key={c.id}>
               <Link
                 href={`/cases/${c.id}`}
-                className="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:border-prajna-navy hover:shadow-sm transition-all"
+                className="flex items-start gap-4 p-4 bg-white border border-prajna-navy/10 rounded-lg hover:border-prajna-navy/40 hover:shadow-sm transition-all"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -119,7 +119,7 @@ export default function HomePage() {
                     {c.district}, {c.state}
                     {c.last_event_at && (
                       <span className="ml-2 text-gray-400">
-                        — updated {new Date(c.last_event_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        · updated {new Date(c.last_event_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     )}
                   </p>
@@ -144,9 +144,9 @@ function StatCard({ label, value, href }: { label: string; value: string; href: 
   return (
     <Link
       href={href}
-      className="bg-white border border-gray-200 rounded-lg p-6 text-center hover:border-prajna-navy hover:shadow-sm transition-all block"
+      className="bg-white border border-prajna-navy/10 rounded-lg p-6 text-center hover:border-prajna-saffron hover:shadow-sm transition-all block"
     >
-      <div className="text-3xl font-bold text-prajna-navy">{value}</div>
+      <div className="text-3xl font-serif font-bold text-prajna-navy">{value}</div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
     </Link>
   )

@@ -9,10 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'prajna-crimson': '#B91C1C',
-        'prajna-saffron': '#F59E0B',
-        'prajna-green': '#059669',
-        'prajna-navy': '#1E3A5F',
+        'prajna-crimson': '#7A1330',
+        'prajna-saffron': '#C08A2E',
+        'prajna-green': '#0F6B4F',
+        'prajna-navy': '#14213D',
+        'prajna-ink': '#0B1220',
+        'prajna-paper': '#FAF7F1',
+      },
+      fontFamily: {
+        serif: ['var(--font-prajna-serif)', 'Georgia', 'serif'],
+        sans: ['var(--font-prajna-sans)', 'system-ui', 'sans-serif'],
       },
     },
   },

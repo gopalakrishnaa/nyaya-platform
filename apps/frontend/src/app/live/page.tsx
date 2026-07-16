@@ -133,7 +133,7 @@ export default function LivePage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-bold text-prajna-navy">🇮🇳 Live Cases — All India</h1>
+          <h1 className="text-2xl font-bold text-prajna-navy">🇮🇳 Live Cases · All India</h1>
           <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-xs font-semibold rounded-full uppercase tracking-wide">
             AI Agent
           </span>
@@ -223,7 +223,7 @@ export default function LivePage() {
                 <span className="font-medium">
                   {r.status === 'running' ? '…' :
                    r.status === 'done' ? `+${r.cases}` :
-                   r.status === 'error' ? '✗' : '—'}
+                   r.status === 'error' ? '✗' : '·'}
                 </span>
               </div>
             ))}

@@ -3,8 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --color-crimson: #B91C1C;
-  --color-saffron: #F59E0B;
-  --color-green: #059669;
-  --color-navy: #1E3A5F;
+  --color-crimson: #7A1330;
+  --color-saffron: #C08A2E;
+  --color-green: #0F6B4F;
+  --color-navy: #14213D;
+  --color-ink: #0B1220;
+  --color-paper: #FAF7F1;
+}
+
+body {
+  background-color: var(--color-paper);
+}
+
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-prajna-serif), Georgia, serif;
+    letter-spacing: -0.01em;
+  }
 }
