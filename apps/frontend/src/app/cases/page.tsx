@@ -58,7 +58,7 @@ interface PageProps {
 
 async function fetchLiveCases(q?: string): Promise<DisplayCase[]> {
   // Use the internal API route (confirmed working) rather than direct Supabase
-  // client — getServiceClient() is unreliable from RSC on Vercel.
+  // client: getServiceClient() is unreliable from RSC on Vercel.
   const base = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : 'http://localhost:3000'
@@ -282,7 +282,7 @@ export default async function CasesPage({ searchParams }: PageProps) {
 
                 <div className="mt-2 text-sm text-gray-600">
                   {c.district}, {c.state}
-                  {c.incident_date && <span className="ml-2 text-gray-400">— {c.incident_date.substring(0, 4)}</span>}
+                  {c.incident_date && <span className="ml-2 text-gray-400">· {c.incident_date.substring(0, 4)}</span>}
                 </div>
                 <div className="mt-1 flex items-center gap-4 text-xs text-gray-400">
                   {c.event_count > 0 && <span>{c.event_count} events</span>}

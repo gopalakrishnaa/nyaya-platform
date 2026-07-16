@@ -61,7 +61,7 @@ interface PageProps {
 }
 
 async function getLiveCase(id: string): Promise<CaseDetail | null> {
-  // Check real-case registry first — no Supabase needed
+  // Check real-case registry first: no Supabase needed
   const registryCase = getRealCaseDetail(id)
   if (registryCase) return registryCase
 
@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const c = await getLiveCase(params.id)
   if (!c) return { title: 'Case Detail' }
   return {
-    title: `${c.case_ref} — ${CATEGORY_LABELS[c.crime_category] ?? c.crime_category}`,
+    title: `${c.case_ref} | ${CATEGORY_LABELS[c.crime_category] ?? c.crime_category}`,
     description: `Case in ${c.district}, ${c.state}. Status: ${c.status.replace(/_/g, ' ')}.`,
   }
 }

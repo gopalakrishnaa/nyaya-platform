@@ -14,6 +14,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.82",
     "@ai-sdk/google": "^2.0.0",
+    "@amplitude/unified": "^1.1.24",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
     "@types/leaflet": "^1.9.12",
@@ -21,7 +22,6 @@
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
     "leaflet": "^1.9.4",
-    "mixpanel-browser": "^2.81.0",
     "next": "14.2.3",
     "next-intl": "^3.13.0",
     "react": "^18.3.1",
@@ -31,7 +31,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/mixpanel-browser": "^2.66.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

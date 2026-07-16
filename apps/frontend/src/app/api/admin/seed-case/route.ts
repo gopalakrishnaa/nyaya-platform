@@ -34,7 +34,7 @@ const REAL_CASES = [
     fast_track_court: false,
     num_victims: 1,
     conviction_achieved: false,
-    headline: 'Twisha Sharma bride death — CBI investigation, husband Samarth & mother-in-law Giribala Singh (retired judge) arrested; MP HC quashed anticipatory bail; CBI recreating crime scene',
+    headline: 'Twisha Sharma bride death: CBI investigation, husband Samarth & mother-in-law Giribala Singh (retired judge) arrested; MP HC quashed anticipatory bail; CBI recreating crime scene',
     source_url: 'https://timesofindia.indiatimes.com/articleshow/131437141.cms',
     source_title: 'Times of India',
     overall_confidence: 0.92,
@@ -46,7 +46,7 @@ const REAL_CASES = [
 export async function GET(req: Request) {
   // Require secret header to prevent unauthenticated DB writes.
   // Set ADMIN_SECRET in Vercel env vars (Settings → Environment Variables).
-  // Header-only — never via query param (would leak into logs/history/Referer).
+  // Header-only: never via query param (would leak into logs/history/Referer).
   const secret = process.env.ADMIN_SECRET
   const provided = req.headers.get('x-admin-secret')
   if (!secret || !provided || !secretsMatch(provided, secret)) {

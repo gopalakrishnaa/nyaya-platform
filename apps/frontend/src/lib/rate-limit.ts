@@ -1,7 +1,7 @@
 /**
  * Best-effort in-memory fixed-window rate limiter.
  *
- * NOTE: On Vercel serverless, memory is per-instance — limits are NOT shared
+ * NOTE: On Vercel serverless, memory is per-instance: limits are NOT shared
  * across concurrent instances or cold starts. This caps abuse per instance and
  * is a meaningful improvement over no limit, but for hard guarantees use a
  * shared store (Upstash/Redis). Adequate for cost-DoS mitigation on AI routes.

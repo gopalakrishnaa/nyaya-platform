@@ -98,7 +98,7 @@ export default function KarnatakaAgentPage() {
         </div>
         <p className="text-gray-600 text-sm max-w-2xl">
           Real-time extraction of reported Karnataka cases from news sources.
-          Follows Prajna Guidelines §4.2 — AI Extraction Pipeline (Google News RSS → Claude → structured data).
+          Follows Prajna Guidelines §4.2: AI Extraction Pipeline (Google News RSS → Claude → structured data).
         </p>
       </div>
 

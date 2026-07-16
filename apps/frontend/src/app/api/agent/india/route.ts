@@ -1,6 +1,6 @@
 /**
- * GET  /api/agent/india           — returns run status + last run metadata
- * POST /api/agent/india           — triggers per-state agents for all India
+ * GET  /api/agent/india          : returns run status + last run metadata
+ * POST /api/agent/india          : triggers per-state agents for all India
  *
  * Because each state takes ~15-20s, POST returns immediately with a run ID
  * and the frontend polls /api/agent/india/[state] for per-state results.
@@ -12,7 +12,7 @@ import { ALL_INDIA_STATES } from '@/lib/agent-pipeline'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// GET — return last run stats + stored case counts
+// GET: return last run stats + stored case counts
 export async function GET() {
   if (!isSupabaseConfigured()) {
     return NextResponse.json({
@@ -60,7 +60,7 @@ export async function GET() {
   }
 }
 
-// POST — create run record, return run ID + states to process
+// POST: create run record, return run ID + states to process
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured() || !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return NextResponse.json({ error: 'Not configured. GET /api/agent/india for setup steps.' }, { status: 503 })
