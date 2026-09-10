@@ -13,6 +13,7 @@ export const ALL_INDIA_STATES = [
 
 import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
+import { anthropic } from '@ai-sdk/anthropic'
 import { z } from 'zod'
 
 // ── INGEST ────────────────────────────────────────────────────────────────────
@@ -128,23 +129,86 @@ export async function extractCases(state: string, articles: NewsItem[]): Promise
     )
     .join('\n\n---\n\n')
 
-  const { object } = await generateObject({
-    model: google('gemini-flash-latest'),
-    schema: ExtractedCaseSchema,
-    system: `You are a legal data extraction agent for the Prajna platform: tracking crimes against women in India.
+  const system = `You are a legal data extraction agent for the Prajna platform: tracking crimes against women in India.
 
 Prajna Guidelines §4.2: Extraction rules:
 - Extract ONLY facts explicitly stated in the article. Never infer or guess.
 - Protect victim privacy: never include real names. Use district-level location only.
 - IPC sections: include ONLY when explicitly named (376=rape, 354=assault, 498A=domestic violence, 302=murder, 304B=dowry death, 366=abduction, 363=kidnapping, POCSO Act)
 - Skip articles that: (a) are opinion/editorial, (b) cover general statistics not specific cases, (c) don't describe a crime against a woman
-- Map article status clues: arrest reported → UNDER_INVESTIGATION; chargesheet filed → CHARGESHEET_FILED; conviction → CLOSED_CONVICTED; acquittal → CLOSED_ACQUITTED; FIR registered → REPORTED`,
+- Map article status clues: arrest reported → UNDER_INVESTIGATION; chargesheet filed → CHARGESHEET_FILED; conviction → CLOSED_CONVICTED; acquittal → CLOSED_ACQUITTED; FIR registered → REPORTED`
 
-    prompt: `Extract structured criminal case data for ${state}, India from these news articles.
+  const prompt = `Extract structured criminal case data for ${state}, India from these news articles.
 
 Include ONLY articles that describe a specific incident of crime against a woman (rape, sexual assault, domestic violence, POCSO, acid attack, dowry death, stalking, trafficking, gang rape).
 
-${corpus}`,
+${corpus}`
+
+  if (process.env.NVIDIA_API_KEY) {
+    let response: Response | undefined
+    let networkError: unknown
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: process.env.NVIDIA_EXTRACTION_MODEL ?? 'nvidia/nemotron-3.5-lightning-30b-a3b',
+            messages: [
+              {
+                role: 'system',
+                content: `${system}\nReturn only valid JSON with one top-level key named "cases". Every case must contain crime_category, status, incident_date, district, ipc_sections, pocso_applicable, fast_track_court, num_victims, conviction_achieved, headline, source_url, and source_title.`,
+              },
+              { role: 'user', content: prompt },
+            ],
+            temperature: 0.1,
+            top_p: 0.95,
+            max_tokens: 6000,
+            stream: false,
+            response_format: { type: 'json_object' },
+            chat_template_kwargs: { enable_thinking: false },
+          }),
+          signal: AbortSignal.timeout(20_000),
+        })
+      } catch (error) {
+        networkError = error
+        response = undefined
+      }
+      if (response?.ok || (response && response.status !== 429 && response.status < 500)) break
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 2_000 * 2 ** attempt))
+    }
+    if (!response?.ok) {
+      const status = response?.status ?? 500
+      const message = response
+        ? await response.text()
+        : networkError instanceof Error ? networkError.message : 'No response'
+      if (process.env.ANTHROPIC_API_KEY && (status === 429 || status >= 500)) {
+        console.warn(`NVIDIA unavailable (${status}); falling back to Claude Haiku for this state`)
+        const { object } = await generateObject({
+          model: anthropic('claude-haiku-4-5-20251001'),
+          schema: ExtractedCaseSchema,
+          system,
+          prompt,
+        })
+        return object.cases
+      }
+      throw new Error(`NVIDIA extraction failed (${status}): ${message.slice(0, 300)}`)
+    }
+    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+    const content = data.choices?.[0]?.message?.content?.trim()
+    if (!content) throw new Error('NVIDIA extraction returned an empty response')
+    const normalized = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    return ExtractedCaseSchema.parse(JSON.parse(normalized)).cases
+  }
+
+  const { object } = await generateObject({
+    model: google('gemini-flash-latest'),
+    schema: ExtractedCaseSchema,
+    system,
+    prompt,
   })
 
   return object.cases

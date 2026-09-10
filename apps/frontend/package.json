@@ -9,6 +9,8 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "ingest": "tsx scripts/ingest.ts",
+    "ingest:all": "tsx scripts/refresh-all-states.ts",
+    "seed:live-cases": "tsx scripts/seed-live-cases.ts",
     "seed:precedents": "tsx scripts/seed-precedents-embeddings.ts"
   },
   "dependencies": {

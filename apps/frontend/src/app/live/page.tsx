@@ -139,7 +139,7 @@ export default function LivePage() {
           </span>
         </div>
         <p className="text-gray-600 text-sm max-w-2xl">
-          AI-extracted cases from 20 Indian states. Pipeline: Google News RSS → Claude Haiku → Supabase.
+          AI-extracted cases from 20 Indian states. Pipeline: Google News RSS → NVIDIA Nemotron → Supabase.
           Follows Prajna Guidelines §4.2 (factual extraction, victim privacy protected).
         </p>
       </div>
@@ -149,7 +149,7 @@ export default function LivePage() {
         <div className="flex items-center gap-2 flex-wrap text-xs">
           <span className="font-mono bg-white/10 px-2 py-1 rounded">📡 Google News RSS ×20 states</span>
           <span className="text-white/40">→</span>
-          <span className="font-mono bg-white/10 px-2 py-1 rounded">🤖 Claude Haiku extraction</span>
+          <span className="font-mono bg-white/10 px-2 py-1 rounded">🤖 NVIDIA Nemotron extraction</span>
           <span className="text-white/40">→</span>
           <span className="font-mono bg-white/10 px-2 py-1 rounded">🗄 Supabase (persisted)</span>
           <span className="text-white/40">→</span>
@@ -162,7 +162,7 @@ export default function LivePage() {
         <div className="border border-amber-200 bg-amber-50 rounded-lg p-6 mb-8">
           <h2 className="font-semibold text-amber-800 mb-3">⚙️ Backend Setup Required</h2>
           <p className="text-sm text-amber-700 mb-4">
-            Backend storage (Supabase) and AI extraction (Anthropic) need to be configured once.
+            Backend storage (Supabase) and AI extraction (NVIDIA or Google) need to be configured once.
           </p>
           <ol className="text-sm text-amber-700 space-y-2 list-decimal list-inside">
             {(agentStatus.setup ?? []).map((step, i) => (
@@ -280,7 +280,7 @@ export default function LivePage() {
             <div className="text-center py-16 text-gray-500">
               {agentStatus?.configured
                 ? 'No cases stored yet. Run the All-India Agent to populate.'
-                : 'Configure Supabase + Anthropic to store and display live cases.'}
+                : 'Configure Supabase + NVIDIA or Google to store and display live cases.'}
             </div>
           )}
 

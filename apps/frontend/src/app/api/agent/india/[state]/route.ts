@@ -29,8 +29,8 @@ export async function GET(
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 503 })
   }
-  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return NextResponse.json({ error: 'GOOGLE_GENERATIVE_AI_API_KEY not set' }, { status: 503 })
+  if (!process.env.NVIDIA_API_KEY && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    return NextResponse.json({ error: 'NVIDIA_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY not set' }, { status: 503 })
   }
 
   const db = getServiceClient()

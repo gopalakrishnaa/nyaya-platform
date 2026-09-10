@@ -70,6 +70,10 @@ agents, set `NVIDIA_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`, or
 `ANTHROPIC_API_KEY`; provider keys
 are read only by the server and are never sent to the browser.
 
+To refresh the live Supabase registry from the validated case dataset, run
+`pnpm --filter @prajna/frontend seed:live-cases`. For a fresh 20-state RSS and
+AI extraction run, use `pnpm --filter @prajna/frontend ingest:all`.
+
 ## Repository Structure
 
 ```

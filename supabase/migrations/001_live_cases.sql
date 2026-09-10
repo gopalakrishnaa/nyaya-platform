@@ -45,6 +45,13 @@ CREATE INDEX IF NOT EXISTS agent_runs_state_idx          ON agent_runs(state, st
 ALTER TABLE live_cases  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_runs  ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public read live_cases"  ON live_cases  FOR SELECT USING (true);
-CREATE POLICY "public read agent_runs"  ON agent_runs  FOR SELECT USING (true);
+DO $$ BEGIN
+  CREATE POLICY "public read live_cases" ON live_cases FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE POLICY "public read agent_runs" ON agent_runs FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 -- Writes go through service role key (server-side only), no public write policy needed
