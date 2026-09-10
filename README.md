@@ -20,6 +20,7 @@ Prajna (Sanskrit: न्याय, "justice") is an open-source nonprofit platfo
 - **Statutory deadline tracking** — 8 benchmarks from FIR to appeal, delay alerts visible to the public
 - **Full-text search** — OpenSearch with multilingual ICU tokenizer and edge-ngram autocomplete
 - **Moderation workflow** — human review queue with approve/reject, audit trail
+- **Low-cost agent builder** — visual LangGraph workflows with demo mode, editable roles, run traces, and hard budget caps
 - **DPDP Act 2023 compliant** — erasure request endpoint, right-to-erasure workflow
 
 ## Architecture
@@ -61,7 +62,13 @@ docker compose -f docker/docker-compose.yml exec api alembic upgrade head
 # Frontend: http://localhost:3000
 # Admin UI:  http://localhost:3001
 # API docs:  http://localhost:8000/docs
+# Agent builder: http://localhost:3000/agents
 ```
+
+The agent builder works immediately in its deterministic demo mode. To run live
+agents, set `NVIDIA_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`, or
+`ANTHROPIC_API_KEY`; provider keys
+are read only by the server and are never sent to the browser.
 
 ## Repository Structure
 

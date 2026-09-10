@@ -15,6 +15,8 @@
     "@ai-sdk/anthropic": "^2.0.82",
     "@ai-sdk/google": "^2.0.0",
     "@amplitude/unified": "^1.1.24",
+    "@langchain/core": "^1.2.10",
+    "@langchain/langgraph": "^1.4.14",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
     "@types/leaflet": "^1.9.12",
