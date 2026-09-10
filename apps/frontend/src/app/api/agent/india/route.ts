@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isSupabaseConfigured, getServiceClient } from '@/lib/supabase-server'
 import { ALL_INDIA_STATES } from '@/lib/agent-pipeline'
+import { isOperator } from '@/lib/operator-auth'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,7 @@ export async function GET() {
 
     return NextResponse.json({
       configured: true,
+      refresh_enabled: Boolean(process.env.ADMIN_SECRET),
       total_cases: casesRes.count ?? 0,
       by_state: byState,
       states: ALL_INDIA_STATES,
@@ -62,12 +64,16 @@ export async function GET() {
 
 // POST: create run record, return run ID + states to process
 export async function POST(req: NextRequest) {
+  if (!isOperator(req)) return NextResponse.json({ error: 'Administrator access is required to refresh records.' }, { status: 401 })
   if (!isSupabaseConfigured() || (!process.env.NVIDIA_API_KEY && !process.env.GOOGLE_GENERATIVE_AI_API_KEY)) {
     return NextResponse.json({ error: 'Not configured. GET /api/agent/india for setup steps.' }, { status: 503 })
   }
 
   const body = await req.json().catch(() => ({}))
   const states: string[] = body.states ?? ALL_INDIA_STATES
+  if (!Array.isArray(states) || !states.length || states.some(state => !ALL_INDIA_STATES.includes(state))) {
+    return NextResponse.json({ error: 'Invalid states.' }, { status: 400 })
+  }
 
   try {
     const db = getServiceClient()

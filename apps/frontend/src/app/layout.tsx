@@ -50,7 +50,7 @@ export default function RootLayout({
           aria-label="Main navigation"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+            <div className="flex flex-wrap items-center justify-between gap-4 min-h-16 py-4">
               <Link
                 href="/"
                 className="flex items-center gap-2 font-serif font-semibold text-lg text-prajna-paper hover:opacity-80"
@@ -60,7 +60,7 @@ export default function RootLayout({
                 <span className="text-sm font-sans font-normal text-gray-400 hidden sm:inline">न्याय</span>
               </Link>
 
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto pb-1 text-nowrap">
                 <Link href="/agents" className="text-sm text-gray-300 hover:text-white font-medium flex items-center gap-1">
                   <span>◇</span> Builder
                 </Link>
@@ -96,7 +96,7 @@ export default function RootLayout({
             </Link>{' '}
             |{' '}
             <a
-              href="https://github.com/prajna-platform/prajna-platform"
+              href="https://github.com/gopalakrishnaa/nyaya-platform"
               className="underline"
               target="_blank"
               rel="noopener noreferrer"

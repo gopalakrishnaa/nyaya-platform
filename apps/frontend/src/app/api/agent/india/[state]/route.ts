@@ -12,17 +12,20 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getServiceClient, isSupabaseConfigured } from '@/lib/supabase-server'
-import { fetchStateNews, extractCases, buildLiveCase } from '@/lib/agent-pipeline'
+import { ALL_INDIA_STATES, fetchStateNews, extractCases, buildLiveCase } from '@/lib/agent-pipeline'
+import { isOperator } from '@/lib/operator-auth'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-export async function GET(
+export async function POST(
   req: NextRequest,
   { params }: { params: { state: string } }
 ) {
+  if (!isOperator(req)) return NextResponse.json({ error: 'Administrator access is required to refresh records.' }, { status: 401 })
   const state = decodeURIComponent(params.state)
+  if (!ALL_INDIA_STATES.includes(state)) return NextResponse.json({ error: 'Invalid state.' }, { status: 400 })
   const runId = req.nextUrl.searchParams.get('run_id') ?? `run-${Date.now()}`
 
   // Guard: config check
@@ -66,8 +69,7 @@ export async function GET(
     const rows = extracted.map((c, i) => buildLiveCase(state, c, stateRunId, i))
 
     if (rows.length > 0) {
-      // Upsert: dedup by case_ref (state + sequential index per run)
-      // For true dedup use source_url: but Google News URLs change on re-fetch
+      // Stable source keys prevent sequential-index collisions across refreshes.
       const { error } = await db
         .from('live_cases')
         .upsert(rows, { onConflict: 'case_ref', ignoreDuplicates: false })

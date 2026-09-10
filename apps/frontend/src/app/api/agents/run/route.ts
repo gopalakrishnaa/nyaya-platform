@@ -4,6 +4,7 @@ import { rateLimit, clientIp } from '@/lib/rate-limit'
 import { runAgentBuilder, runAgentSchema } from '@/lib/agent-builder'
 
 export const runtime = 'nodejs'
+export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
 export function GET() {

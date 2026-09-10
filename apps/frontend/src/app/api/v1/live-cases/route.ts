@@ -15,6 +15,9 @@ export async function GET(req: NextRequest) {
   const s = req.nextUrl.searchParams
   const page = parseInt(s.get('page') ?? '1', 10)
   const pageSize = Math.min(parseInt(s.get('page_size') ?? '20', 10), 100)
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1) {
+    return NextResponse.json({ error: 'Page and page_size must be positive integers.' }, { status: 400 })
+  }
   const state = s.get('state')
   const crimeCategory = s.get('crime_category')
   const status = s.get('status')

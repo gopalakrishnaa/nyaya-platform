@@ -67,6 +67,8 @@ export default function LivePage() {
   const [stateRuns, setStateRuns] = useState<StateRun[]>([])
   const [agentRunning, setAgentRunning] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [operatorSecret, setOperatorSecret] = useState('')
+  const [runError, setRunError] = useState('')
 
   // Fetch status on mount
   useEffect(() => {
@@ -93,12 +95,25 @@ export default function LivePage() {
 
   // Run all-India agent: trigger per-state sequentially (avoids CORS/timeout issues)
   async function runAllIndiaAgent() {
+    setRunError('')
     setAgentRunning(true)
     const initialRuns: StateRun[] = ALL_STATES.map(s => ({ state: s, status: 'idle', cases: 0 }))
     setStateRuns(initialRuns)
 
     // Create run
-    const initRes = await fetch('/api/agent/india', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+    let initRes: Response
+    try {
+      initRes = await fetch('/api/agent/india', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-secret': operatorSecret }, body: '{}' })
+    } catch {
+      setRunError('Unable to connect. Please retry.')
+      setAgentRunning(false)
+      return
+    }
+    if (!initRes.ok) {
+      setRunError('Refresh requires an administrator key configured on the server.')
+      setAgentRunning(false)
+      return
+    }
     const { run_id } = await initRes.json()
 
     // Process states sequentially to avoid hitting Claude rate limits
@@ -106,7 +121,7 @@ export default function LivePage() {
       const state = ALL_STATES[i]
       setStateRuns(prev => prev.map(r => r.state === state ? { ...r, status: 'running' } : r))
       try {
-        const res = await fetch(`/api/agent/india/${encodeURIComponent(state)}?run_id=${run_id}&t=${Date.now()}`, { cache: 'no-store' })
+        const res = await fetch(`/api/agent/india/${encodeURIComponent(state)}?run_id=${run_id}`, { method: 'POST', headers: { 'x-admin-secret': operatorSecret }, cache: 'no-store' })
         const data = await res.json()
         setStateRuns(prev => prev.map(r =>
           r.state === state ? { ...r, status: res.ok ? 'done' : 'error', cases: data.cases_extracted ?? 0, error: data.error } : r
@@ -194,13 +209,18 @@ export default function LivePage() {
             <div className="text-xs text-gray-500 mt-1">Target States</div>
           </div>
           <div className="bg-white border rounded-lg p-4 text-center">
+            <label className="block text-xs text-gray-600 mb-2">
+              Administrator key
+              <input type="password" autoComplete="off" value={operatorSecret} onChange={event => setOperatorSecret(event.target.value)} className="mt-1 w-full border rounded px-2 py-1" placeholder="Required for refresh" />
+            </label>
             <button
               onClick={runAllIndiaAgent}
-              disabled={agentRunning}
+              disabled={agentRunning || !operatorSecret}
               className="w-full px-3 py-2 bg-prajna-navy text-white text-xs rounded font-medium hover:bg-prajna-navy/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {agentRunning ? '⏳ Running…' : '▶ Run All-India Agent'}
             </button>
+            {runError && <p role="alert" className="mt-2 text-xs text-red-700">{runError}</p>}
           </div>
         </div>
       )}
