@@ -86,7 +86,10 @@ const TEMPLATES: Array<{ label: string; description: string; config: BuilderConf
 
 const MODELS: Record<Provider, Array<{ value: string; label: string }>> = {
   demo: [{ value: 'demo', label: 'Demo — free' }],
-  nvidia: [{ value: 'nvidia/nemotron-3-ultra-550b-a55b', label: 'Nemotron 3 Ultra 550B — free prototype' }],
+  nvidia: [
+    { value: 'nvidia/nemotron-3.5-lightning-30b-a3b', label: 'Nemotron 3.5 Lightning — recommended' },
+    { value: 'nvidia/nemotron-3-ultra-550b-a55b', label: 'Nemotron 3 Ultra — may be slow' },
+  ],
   google: [
     { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite — lowest cost' },
     { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite — stronger' },
@@ -120,7 +123,7 @@ export default function AgentBuilder() {
 
   const activeAgent = config.agents[selected] ?? config.agents[0]
   const canRun = input.trim().length > 0 && config.objective.trim().length >= 5 && config.agents.length > 0
-  const costLabel = useMemo(() => ['demo', 'nvidia'].includes(config.provider) ? '$0 trial' : `≤ $${config.maxBudgetUsd.toFixed(2)}`, [config])
+  const costLabel = useMemo(() => config.provider === 'demo' ? 'Free demo' : config.provider === 'nvidia' ? 'Prototype trial' : `Est. $${config.maxBudgetUsd.toFixed(2)} limit`, [config])
 
   function updateAgent(patch: Partial<AgentRole>) {
     setConfig(current => ({
@@ -243,8 +246,8 @@ export default function AgentBuilder() {
           </div>
           <button onClick={addAgent} disabled={config.agents.length >= 6} className="mt-4 w-full rounded-lg border border-dashed border-gray-300 py-2 text-xs font-semibold text-gray-500 hover:border-prajna-navy hover:text-prajna-navy disabled:opacity-40">+ Add agent</button>
           <div className="mt-5 rounded-lg bg-emerald-50 p-3 text-xs leading-relaxed text-emerald-800">
-            <strong className="block mb-1">Cost guard active</strong>
-            The graph stops before a call that could exceed your budget.
+            <strong className="block mb-1">Estimated cost guard</strong>
+            Stops when the next call is estimated to exceed your budget. Provider billing may differ.
           </div>
         </aside>
 

@@ -52,6 +52,7 @@ const MODEL_PRICES: Record<string, { input: number; output: number }> = {
   'claude-3-5-haiku-20241022': { input: 0.8, output: 4 },
   // build.nvidia.com currently describes this as a free prototype endpoint.
   'nvidia/nemotron-3-ultra-550b-a55b': { input: 0, output: 0 },
+  'nvidia/nemotron-3.5-lightning-30b-a3b': { input: 0, output: 0 },
 }
 
 const BuilderState = Annotation.Root({
