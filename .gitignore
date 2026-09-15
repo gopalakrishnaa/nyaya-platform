@@ -144,3 +144,11 @@ tmp/
 temp/
 .vercel
 .env*.local
+
+# --- Local agent tooling / generated analysis ---
+**/.agents/skills/
+skills-lock.json
+graphify-out/
+
+# One-off local Supabase diagnostic
+/apps/frontend/check_supabase.js
